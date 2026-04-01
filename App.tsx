@@ -1,45 +1,51 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import SplashScreen from './UCOY/Screens/SplashScreen';
+import Onboarding from './UCOY/Screens/Onboarding';
+import ChooseRole from './UCOY/Screens/ChooseRole';
+import Guru from './UCOY/Screens/Guru';
+import Siswa from './UCOY/Screens/Siswa';
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+import Profileguru from './UCOY/Screens/Profileguru';
+import Profilesiswa from './UCOY/Screens/Profilesiswa';
+import formbuatkelas from './UCOY/Screens/formbuatkelas';
+import DetailKelasGuru from './UCOY/Screens/DetailKelasGuru';
 
+export type RootStackParamList = {
+  Splash: undefined;
+  Onboarding: undefined;
+  ChooseRole: undefined;
+  Guru: undefined;
+  Siswa: undefined;
+  Profileguru: undefined;
+  Profilesiswa: undefined;
+  formbuatkelas: undefined;
+
+  DetailKelasGuru: { kelas: any };
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+export default function App() {
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="Splash"
+        screenOptions={{ headerShown: false }}
+      >
+        <Stack.Screen name="Splash" component={SplashScreen} />
+        <Stack.Screen name="Onboarding" component={Onboarding} />
+        <Stack.Screen name="ChooseRole" component={ChooseRole} />
+        <Stack.Screen name="Guru" component={Guru} />
+        <Stack.Screen name="Siswa" component={Siswa} />
+
+        <Stack.Screen name="Profileguru" component={Profileguru} />
+        <Stack.Screen name="Profilesiswa" component={Profilesiswa} />
+        <Stack.Screen name="formbuatkelas" component={formbuatkelas} />
+        <Stack.Screen name="DetailKelasGuru" component={DetailKelasGuru} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
-export default App;
