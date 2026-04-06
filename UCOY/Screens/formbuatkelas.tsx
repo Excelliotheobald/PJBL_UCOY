@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: 300,
     height: 300,
-    opacity: 0.2,
+    opacity: 0.3,
     zIndex: 1,
     marginTop: -60,
   },
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
 
     paddingTop:
       Platform.OS === "android" ? StatusBar.currentHeight : 20,
-    paddingBottom: 80, 
+    paddingBottom: 100, 
 
     borderBottomLeftRadius: 25,
     borderBottomRightRadius: 25,
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
 
-  side: {
+ side : {
     width: 40,
     alignItems: "center",
   },

@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
@@ -10,148 +9,279 @@ import {
   StatusBar,
   Image,
   ScrollView,
+  Alert,
 } from "react-native";
-import { ChevronLeft, Plus, Users, FileText } from "lucide-react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ChevronLeft, Plus, } from "lucide-react-native";
+import { Animated } from "react-native";
+import { useRef, useState } from "react";
 
-export default function FormBuatKelas({ navigation }: any) {
-  const [judul, setJudul] = useState("");
-  const [tingkat, setTingkat] = useState("");
+export default function KelolaKelas({ navigation }: any) {
 
-  const isFilled = judul && tingkat;
+  const [activeTab, setActiveTab] = useState("ujian");
+  const translateX = useRef(new Animated.Value(0)).current;
 
-  const simpanKelas = async () => {
-    if (!isFilled) return;
+  const switchTab = (tab: "ujian" | "siswa") => {
+  setActiveTab(tab);
 
-    const dataBaru = {
-      id: Date.now().toString(),
-      mapel: judul,
-      namaKelas: tingkat,
-    };
+  Animated.timing(translateX, {
+    toValue: tab === "ujian" ? 0 : 1,
+    duration: 250,
+    useNativeDriver: false,
+  }).start();
+};
 
-    try {
-      const dataLama = await AsyncStorage.getItem("kelas");
-      let arr = dataLama ? JSON.parse(dataLama) : [];
+const [tabWidth, setTabWidth] = useState(0);
 
-      arr.push(dataBaru);
+const sliderPosition = translateX.interpolate({
+  inputRange: [0, 1],
+  outputRange: [0, tabWidth / 2],
+});
 
-      await AsyncStorage.setItem("kelas", JSON.stringify(arr));
-
-      navigation.goBack();
-    } catch (err) {
-      console.log(err);
-    }
+  const salinKode = () => {
+    const kodeKelas = "M45-13L";
+    Alert.alert("Kode tersalin", `Kode ${kodeKelas} telah disalin`);
   };
 
- return (
-  <SafeAreaView style={styles.container}>
-    <StatusBar barStyle="light-content" backgroundColor="#1D1A9B" />
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#1D1A9B" />
 
-    {/* ===== HEADER ===== */}
-    <View style={styles.header}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
-        <ChevronLeft size={28} color="#fff" />
-      </TouchableOpacity>
-      <Text style={styles.headerTitle}>Kelola</Text>
-      <View style={styles.placeholder} />
-    </View>
+      {/* ===== HEADER ===== */}
+      <View style={styles.header}>
+        <TouchableOpacity
+         style={styles.side}
+        onPress={() => navigation.goBack()}>
+          <ChevronLeft size={28} color="#fff" />
+        </TouchableOpacity>
 
-    {/* ===== CARD (KELUAR DARI SCROLLVIEW) ===== */}
-    <View style={styles.codeCard}>
-      <View style={styles.codeHeader}>
-        <View style={styles.codeBadge}>
-          <Text style={styles.codeBadgeText}>1 2 3</Text>
-        </View>
-        <Text style={styles.codeTitle}>Matematika Kelas 11</Text>
+        <Text style={styles.headerTitle}>Kelola</Text>
+
+        <View style={{ width: 28 }} />
       </View>
 
-      <View style={styles.codeContainer}>
-        <Text style={styles.codeLabel}>Kode Kelas</Text>
-        <Text style={styles.codeValue}>M45-13L</Text>
-      </View>
+       <Image
+                  source={require("./tulis.png")}
+                  style={styles.bgImage}
+                  resizeMode="contain"
+                />
 
-      <Text style={styles.codeDescription}>
-        Bagikan kode ini ke siswa untuk bergabung ke kelas.
-      </Text>
-
-      <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <Users size={20} color="#1D1A9B" />
-          <Text style={styles.statNumber}>20</Text>
-          <Text style={styles.statLabel}>Siswa</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <FileText size={20} color="#1D1A9B" />
-          <Text style={styles.statNumber}>0</Text>
-          <Text style={styles.statLabel}>Ujian</Text>
-        </View>
-      </View>
-    </View>
-
-    {/* ===== SCROLL ===== */}
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingTop: 160, paddingBottom: 30 }}
-    >
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Soal</Text>
-
-        <View style={styles.subSection}>
-          <Text style={styles.subSectionTitle}>Ujian</Text>
-          <View style={styles.studentCount}>
-            <Users size={16} color="#666" />
-            <Text style={styles.studentCountText}>Siswa (20)</Text>
+      {/* ===== CARD ===== */}
+      <View style={styles.codeCard}>
+        <View style={styles.codeHeader}>
+          <View style={styles.logoContainer}>
+            <Image source={require("./123.png")} style={styles.logoImage} />
           </View>
+          <Text style={styles.codeTitle}>Matematika Kelas 11</Text>
         </View>
 
-        <View style={styles.subSection}>
-          <Text style={styles.subSectionTitle}>Soal Ujian</Text>
-          <TouchableOpacity style={styles.createButtonOutline}>
-            <Plus size={20} color="#1D1A9B" />
-            <Text style={styles.createButtonOutlineText}>
+        <View style={styles.codeContainer}>
+
+  {/* BARIS ATAS */}
+  <View style={styles.codeTopRow}>
+    <Text style={styles.codeLabel}>Kode Kelas</Text>
+
+    <View style={styles.actionRow}>
+      <TouchableOpacity style={styles.salinButton} onPress={salinKode}>
+        <Text style={styles.salinText}>Salin Kode</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.iconButton}>
+        <Image source={require("./kode.png")} style={styles.salinIcon} />
+      </TouchableOpacity>
+    </View>
+  </View>
+
+  {/* KODE BESAR */}
+  <Text style={styles.codeValue}>M45-13L</Text>
+
+  {/* DESKRIPSI */}
+  <Text style={styles.codeDescription}>
+    Bagikan kode ini ke siswa untuk bergabung ke kelas.
+  </Text>
+
+</View>
+
+        {/* ===== STATS ===== */}
+       <View style={styles.statsContainer}>
+  <View style={styles.statCard}>
+    <Text style={styles.statNumber}>20</Text>
+    <Text style={styles.statLabel}>Siswa</Text>
+  </View>
+
+  <View style={styles.statCard}>
+    <Text style={styles.statNumber}>0</Text>
+    <Text style={styles.statLabel}>Ujian</Text>
+  </View>
+
+  <View style={styles.statCard}>
+    <Text style={styles.statNumber}>0</Text>
+    <Text style={styles.statLabel}>Soal</Text>
+  </View>
+</View>
+        
+      </View>
+
+      {/* ===== TAB ===== */}
+<View
+  style={styles.tabContainer}
+  onLayout={(e) => setTabWidth(e.nativeEvent.layout.width)}
+>
+  {/* SLIDER */}
+  <Animated.View
+    style={[
+      styles.slider,
+      {
+        transform: [{ translateX: sliderPosition }],
+      },
+    ]}
+  />
+
+  {/* UJIAN */}
+  <TouchableOpacity
+    style={styles.tabButton}
+    onPress={() => switchTab("ujian")}
+  >
+    <Text
+      style={
+        activeTab === "ujian"
+          ? styles.activeText
+          : styles.inactiveText
+      }
+    >
+      Ujian
+    </Text>
+  </TouchableOpacity>
+
+  {/* SISWA */}
+  <TouchableOpacity
+    style={styles.tabButton}
+    onPress={() => switchTab("siswa")}
+  >
+    <Text
+      style={
+        activeTab === "siswa"
+          ? styles.activeText
+          : styles.inactiveText
+      }
+    >
+      Siswa
+    </Text>
+  </TouchableOpacity>
+</View>
+
+
+     
+      {/* ===== CONTENT ===== */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 30 }}
+      >
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Soal Ujian</Text>
+
+          <TouchableOpacity style={styles.createButton}>
+            <Plus size={20} color="#fff" />
+            <Text style={styles.createButtonText}>
               Buat Soal Ujian
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
-    </ScrollView>
-  </SafeAreaView>
-);
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
+
+
+ tabContainer: {
+  flexDirection: "row",
+  marginHorizontal: 16,
+  marginTop: 12,
+  backgroundColor: "#fff",
+  borderRadius: 12,
+  height: 44,
+  position: "relative",
+  overflow: "hidden",
+zIndex:10,
+ 
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.8,
+  shadowRadius: 6,
+
+  elevation: 8,
+},
+
+tabButton: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 2,
+},
+
+slider: {
+  position: "absolute",
+  width: "50%",
+  height: "100%",
+  backgroundColor: "#1D1A9B",
+  borderRadius: 12,
+},
+
+activeText: {
+  color: "#fff",
+  fontWeight: "600",
+},
+
+inactiveText: {
+  color: "#666",
+  fontWeight: "500",
+},
+
+bgImage: {
+    position: "absolute",
+    top: 10,
+    alignSelf: "center",
+    width: 300,
+    height: 300,
+    opacity: 0.3,
+    zIndex: 1,
+    marginTop: -60,
+  },
+
   container: {
     flex: 1,
     backgroundColor: "#F5F7FA",
   },
 
- scrollContent: {
-  flexGrow: 1,
-  paddingBottom: 30,
-  paddingTop: 10, // <-- tambahin ini
+  codeTopRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 6,
 },
 
   header: {
-  backgroundColor: "#1D1A9B",
-  height: 180,
-  flexDirection: "row",
-  alignItems: "flex-start",
-  justifyContent: "space-between",
-  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 20,
-  paddingHorizontal: 16,
-  borderBottomLeftRadius: 25,
-  borderBottomRightRadius: 25,
-  elevation: 5,
-  overflow: "hidden", // <-- tambahin ini
-},
+   backgroundColor: "#1D1A9B",
+    height: 200,
 
-  backButton: {
-    padding: 4,
-    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+
+    paddingTop:
+      Platform.OS === "android" ? StatusBar.currentHeight : 20,
+    paddingBottom: 100, 
+
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+
+    elevation: 10,
+  },
+
+  side : {
+    width: 40,
+    alignItems: "center",
   },
 
   headerTitle: {
@@ -161,26 +291,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 
-  placeholder: {
-    width: 36,
-    marginTop: 8,
-  },
-
   codeCard: {
-  backgroundColor: "#fff",
-  marginHorizontal: 16,
-  marginTop: -50, // <-- BESARIN dikit biar naik ke header
-  borderRadius: 20,
-  padding: 20,
-
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.15,
-  shadowRadius: 10,
-
-  elevation: 8, // <-- penting untuk Android
-  zIndex: 10,   // <-- biar di atas header
-},
+    backgroundColor: "#fff",
+    marginHorizontal: 16,
+    marginTop: -70,
+    borderRadius: 12,
+    padding: 20,
+    elevation: 8,
+    zIndex:10
+    },
 
   codeHeader: {
     flexDirection: "row",
@@ -188,147 +307,160 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
-  codeBadge: {
-    backgroundColor: "#E8EAF6",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+  logoContainer: {
+    backgroundColor: "rgba(29,26,155,0.1)",
+    borderRadius: 8,
+    padding: 8,
     marginRight: 12,
+    width: 50,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
-  codeBadgeText: {
-    color: "#1D1A9B",
-    fontWeight: "600",
-    fontSize: 14,
+  logoImage: {
+    width: 36,
+    height: 36,
   },
 
   codeTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#1a1a1a",
   },
 
   codeContainer: {
-    backgroundColor: "#F8F9FF",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#E8EAF6",
+    backgroundColor: "rgba(29,26,155,0.1)",
+  padding: 16,
+  borderRadius: 12,
+  marginBottom: 12,
+  position: "relative", // 🔥 WAJIB
+    
   },
 
   codeLabel: {
     fontSize: 12,
     color: "#666",
     marginBottom: 4,
-    letterSpacing: 0.5,
+  },
+
+  codeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 
   codeValue: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#1D1A9B",
-    letterSpacing: 1,
+    fontSize: 20,
+    fontWeight: "500",
   },
+
+ actionRow: {
+ position: "absolute",
+  right: 0,
+  top: "50%",
+  transform: [{ translateY: -12 }], // 🔥 biar center vertikal
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 8,
+},
+
+salinButton: {
+  backgroundColor: "#1D1A9B",
+  paddingVertical: 6,
+  paddingHorizontal: 14,
+  borderRadius: 8,
+},
+
+salinText: {
+  color: "#fff",
+  fontSize: 13,
+  fontWeight: "600",
+},
+
+iconButton: {
+  backgroundColor: "rgba(29,26,155,0.1)",
+  padding: 4,
+  borderRadius: 8,
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+salinIcon: {
+  width: 26,
+  height: 26,
+  tintColor: "#1D1A9B", // optional biar warna nyatu
+},
 
   codeDescription: {
-    fontSize: 13,
+    fontSize: 12,
     color: "#666",
-    lineHeight: 18,
-    marginBottom: 20,
-  },
-
-  statsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#F0F0F0",
-  },
-
-  statItem: {
-    alignItems: "center",
-    flex: 1,
-  },
-
-  statNumber: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#1a1a1a",
     marginTop: 8,
   },
 
-  statLabel: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: 4,
-  },
+  statsContainer: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginTop: 10,
+},
 
-  statDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: "#E0E0E0",
-  },
+statCard: {
+  flex: 1,
+  backgroundColor: "rgba(29,26,155,0.1)",
+  borderRadius: 12,
+  paddingVertical: 8,
+  paddingHorizontal: 1,
+  alignItems: "center",
+  marginHorizontal: 4,
+},
+
+statNumber: {
+  fontSize: 17,
+  fontWeight: "500",
+  color: "#1D1A9B",
+},
+
+statLabel: {
+  fontSize: 12,
+  color: "#666",
+  marginTop: 4,
+}, 
 
   section: {
-    marginHorizontal: 16,
-    marginTop: 20,
-    marginBottom: 30,
-  },
+  marginHorizontal: 16,
+  marginTop: 40,
+  backgroundColor: "#fff",
+  borderRadius: 16,
 
-  sectionTitle: {
-    fontSize: 20,
+  padding: 16, // 🔥 BIAR ADA JARAK DALAM
+
+  // SHADOW HALUS IOS
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.08,
+  shadowRadius: 6,
+
+  // ANDROID
+  elevation: 3, // 🔥 jangan terlalu tinggi
+},
+
+ sectionTitle: {
+  fontSize: 16,
+  fontWeight: "600",
+  marginBottom: 12,
+  color: "#1a1a1a",
+},
+
+  createButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: "#B2DF20",
+  borderRadius: 12,
+  paddingVertical: 12, // 🔥 lebih proporsional
+  gap: 8,
+},
+  createButtonText: {
+    color: "#fff",
     fontWeight: "600",
-    color: "#1a1a1a",
-    marginBottom: 16,
-  },
-
-  subSection: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-
-  subSectionTitle: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-    marginBottom: 12,
-  },
-
-  studentCount: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-
-  studentCountText: {
-    fontSize: 14,
-    color: "#666",
-  },
-
-  createButtonOutline: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#1D1A9B",
-    borderRadius: 12,
-    paddingVertical: 12,
-    gap: 8,
-    backgroundColor: "#fff",
-  },
-
-  createButtonOutlineText: {
-    color: "#1D1A9B",
-    fontWeight: "500",
-    fontSize: 14,
   },
 });
