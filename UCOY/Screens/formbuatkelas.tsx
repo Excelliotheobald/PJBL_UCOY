@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   Platform,
   StatusBar,
+  Image
 } from "react-native";
 import { ChevronLeft } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -21,7 +22,11 @@ export default function FormBuatKelas({ navigation }: any) {
   const simpanKelas = async () => {
     if (!isFilled) return;
 
-    const dataBaru = { judul, tingkat };
+    const dataBaru = {
+  id: Date.now().toString(),
+  mapel: judul,
+  namaKelas: tingkat,
+};
 
     try {
       const dataLama = await AsyncStorage.getItem("kelas");
@@ -41,12 +46,17 @@ export default function FormBuatKelas({ navigation }: any) {
     <SafeAreaView style={styles.container}>
       {/* ===== HEADER WRAPPER ===== */}
       <View style={styles.headerWrapper}>
+        <Image
+          source={require("./tulis.png")}
+          style={styles.bgImage}
+          resizeMode="contain"
+        />
+
         {/* GLOW */}
         <View style={styles.glow} />
 
         {/* HEADER */}
         <View style={styles.header}>
-          {/* LEFT */}
           <TouchableOpacity
             style={styles.side}
             onPress={() => navigation.goBack()}
@@ -54,15 +64,13 @@ export default function FormBuatKelas({ navigation }: any) {
             <ChevronLeft size={26} color="#fff" />
           </TouchableOpacity>
 
-          {/* CENTER */}
           <Text style={styles.headerTitle}>Buat Kelas</Text>
 
-          {/* RIGHT (SPACER) */}
           <View style={styles.side} />
         </View>
       </View>
 
-      {/* ===== CARD (OVERLAP) ===== */}
+      {/* ===== CARD ===== */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Informasi Ujian</Text>
 
@@ -113,9 +121,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#f4f6f8",
   },
 
-  /* ===== HEADER WRAPPER ===== */
   headerWrapper: {
     position: "relative",
+  },
+
+  bgImage: {
+    position: "absolute",
+    top: 10,
+    alignSelf: "center",
+    width: 300,
+    height: 300,
+    opacity: 0.2,
+    zIndex: 1,
+    marginTop: -60,
   },
 
   glow: {
@@ -124,23 +142,22 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     height: 70,
-
     backgroundColor: "#1D1A9B",
     opacity: 0.5,
-
     borderRadius: 50,
   },
 
-  /* ===== HEADER ===== */
   header: {
     backgroundColor: "#1D1A9B",
-    paddingTop:
-      Platform.OS === "android" ? StatusBar.currentHeight : 20,
-    paddingBottom: 120,
+    height: 200,
 
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+
+    paddingTop:
+      Platform.OS === "android" ? StatusBar.currentHeight : 20,
+    paddingBottom: 80, 
 
     borderBottomLeftRadius: 25,
     borderBottomRightRadius: 25,
@@ -155,11 +172,10 @@ const styles = StyleSheet.create({
 
   headerTitle: {
     color: "#fff",
-    fontSize: 20,
-    fontWeight: "700",
+    fontSize: 23,
+    fontWeight: "500",
   },
 
-  /* ===== CARD ===== */
   card: {
     backgroundColor: "#fff",
     marginHorizontal: 16,
@@ -172,6 +188,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 8,
     elevation: 5,
+    zIndex: 2,
   },
 
   cardTitle: {
@@ -182,7 +199,7 @@ const styles = StyleSheet.create({
 
   label: {
     marginTop: 10,
-    marginBottom: 6,
+    marginBottom: 15,
     fontSize: 14,
     color: "#333",
   },
@@ -196,7 +213,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fafafa",
   },
 
-  /* ===== BUTTON ===== */
   buttonContainer: {
     flexDirection: "row",
     marginHorizontal: 16,

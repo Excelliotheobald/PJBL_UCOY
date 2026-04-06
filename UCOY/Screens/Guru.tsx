@@ -25,8 +25,6 @@ import { useEffect, useState } from 'react';
 interface KelasType {
   id: string;
   namaKelas: string;
-  bagian: string;
-  ruang: string;
   mapel: string;
 }
 
@@ -46,8 +44,15 @@ export default function Guru({ navigation }: any) {
       // 🟩 Ambil data kelas
       const savedClass = await AsyncStorage.getItem('kelas');
       if (savedClass) {
-        setKelas(JSON.parse(savedClass));
-      } else {
+  const parsed = JSON.parse(savedClass);
+
+  // 🔥 filter data biar cuma yang valid
+  const cleanData = parsed.filter(
+    (item: any) => item.mapel && item.namaKelas
+  );
+
+  setKelas(cleanData);
+}else {
         setKelas([]);
       }
     };
@@ -299,28 +304,24 @@ export default function Guru({ navigation }: any) {
               {kelas.map((item, index) => (
                 <View key={index} style={styles.classCard}>
                   {/* Ikon 123 */}
+                   <Image
+                      source={require("./123.png")}
+                      style={styles.numberImage}
+                    />
 
                   <View style={{ flex: 1, marginLeft: 15 }}>
-                    <Text style={styles.mapelText}>
-                      {item.mapel} Kelas {item.namaKelas}
+                  <Text style={styles.mapelText}>
+                   {item.mapel} Kelas {item.namaKelas}
                     </Text>
-
-                    <Text style={styles.subText}>
-                      {item.bagian} • Ruang {item.ruang}
-                    </Text>
+                  <Text style={styles.subText}>
+      20 Siswa • 1 Ujian Aktif
+    </Text>
                   </View>
 
                   <TouchableOpacity
                     style={styles.kelolaBtn}
                     onPress={() => navigation.navigate("DetailKelasGuru", { kelas: item })} >
                     <Text style={styles.kelolaText}>Kelola</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    onPress={() => handleDeleteClass(item.id)}
-                    style={{ marginLeft: 10 }}
-                  >
-                    <Trash2 size={22} color="#ff4444" />
                   </TouchableOpacity>
                 </View>
               ))}
@@ -337,6 +338,14 @@ export default function Guru({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
+
+numberImage: {
+  width: 40,
+  height: 60,
+  resizeMode: "contain",
+},
+
+
   headerWrapper: {
     height: HEADER_HEIGHT,
     borderBottomLeftRadius: 40,
@@ -346,14 +355,14 @@ const styles = StyleSheet.create({
   },
 
   classCard: {
-    flexDirection: 'row',
-    backgroundColor: '#D3D2FF',
-    padding: 27,
-    borderRadius: 12,
-    marginHorizontal: 20,
-    marginTop: 15,
-    alignItems: 'center',
-  },
+  flexDirection: 'row',
+  backgroundColor: '#CFCBFF',
+  padding: 20,
+  borderRadius: 16,
+  marginHorizontal: 20,
+  marginTop: 15,
+  alignItems: 'center',
+},
 
   mapelText: {
     fontSize: 18,
@@ -661,15 +670,15 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginTop: -35,
+    paddingHorizontal: 25,
+    marginTop: -45,
   },
 
   statBox: {
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
-    width: '32%',
-    paddingVertical: 20,
+    width: '31%',
+    paddingVertical: 15,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOpacity: 0.2,
@@ -679,14 +688,14 @@ const styles = StyleSheet.create({
   },
 
   statNumber: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '500',
     color: '#000',
   },
 
   statLabel: {
     marginTop: 4,
     fontSize: 15,
-    color: '#333',
+    color: '#000',
   },
 });
