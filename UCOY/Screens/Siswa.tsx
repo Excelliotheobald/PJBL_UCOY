@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,20 +7,72 @@ import {
   TouchableOpacity,
   ScrollView,
   StatusBar,
+  TextInput,
+  Alert,
 } from "react-native";
 
-import Footersiswa from "../Components/Footersiswa"; // ⬅️ IMPORT FOOTER
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Footersiswa from "../Components/Footersiswa";
 
-export default function Siswa() {
-  const handleLogout = () => {
-    console.log("Kamu telah logout");
+export default function Siswa({ navigation }: any) {
+  const [kodeKelas, setKodeKelas] = useState("");
+
+  // ✅ LOGOUT (AMAN)
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("user"); // ❗ jangan clear semua
+    navigation.replace("ChooseRole");
+  };
+
+  // ✅ JOIN KELAS
+  const handleJoinKelas = async () => {
+    const data = await AsyncStorage.getItem("kelas");
+    let list = data ? JSON.parse(data) : [];
+
+    const kelasDitemukan = list.find((k: any) => k.kode === kodeKelas);
+
+    if (!kelasDitemukan) {
+      Alert.alert("Kode kelas tidak ditemukan");
+      return;
+    }
+
+    // ✅ ambil user login
+    const userData = await AsyncStorage.getItem("user");
+    const user = userData ? JSON.parse(userData) : null;
+
+    const namaUser = user?.nama || "Siswa";
+
+    // ✅ buat array siswa kalau belum ada
+    if (!kelasDitemukan.siswa) {
+      kelasDitemukan.siswa = [];
+    }
+
+    // ✅ CEGAH DUPLIKAT (FIX DISINI)
+    const sudahMasuk = kelasDitemukan.siswa.find(
+      (s: any) => s.nama === namaUser
+    );
+
+    if (!sudahMasuk) {
+      kelasDitemukan.siswa.push({
+        nama: namaUser,
+      });
+    }
+
+    // ✅ update storage
+    const updated = list.map((k: any) =>
+      k.id === kelasDitemukan.id ? kelasDitemukan : k
+    );
+
+    await AsyncStorage.setItem("kelas", JSON.stringify(updated));
+
+    // ✅ pindah ke halaman kelas siswa
+    navigation.navigate("KelasSiswa", { kelas: kelasDitemukan });
   };
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#2A3FD8" />
 
-      {/* Header Profil */}
+      {/* HEADER */}
       <View style={styles.header}>
         <View style={styles.profileContainer}>
           <Image
@@ -30,7 +82,7 @@ export default function Siswa() {
             style={styles.profileImage}
           />
           <View>
-            <Text style={styles.greeting}>Halo, Daffa Permana Perkasa</Text>
+            <Text style={styles.greeting}>Halo, Siswa</Text>
             <Text style={styles.subGreeting}>Siap untuk Ujian?</Text>
           </View>
         </View>
@@ -40,9 +92,22 @@ export default function Siswa() {
         </TouchableOpacity>
       </View>
 
-      {/* Konten Scroll */}
       <ScrollView style={{ flex: 1 }}>
-        {/* Info Hari */}
+        {/* INPUT KODE */}
+        <View style={styles.joinContainer}>
+          <TextInput
+            placeholder="Masukkan kode kelas"
+            value={kodeKelas}
+            onChangeText={setKodeKelas}
+            style={styles.input}
+          />
+
+          <TouchableOpacity style={styles.joinButton} onPress={handleJoinKelas}>
+            <Text style={styles.joinText}>Gabung Kelas</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Dummy UI */}
         <View style={styles.dateCard}>
           <Text style={styles.dateText}>29</Text>
           <View style={{ flex: 1 }}>
@@ -55,68 +120,26 @@ export default function Siswa() {
           </View>
         </View>
 
-        {/* Kelas dan Jurusan */}
         <View style={styles.infoRow}>
-          <Text style={styles.infoBadge}>Kelas 11 SMK</Text>
-          <Text style={styles.infoBadge}>Jurusan PPLG</Text>
+          <Text style={styles.infoBadge}>Kelas 11</Text>
+          <Text style={styles.infoBadge}>PPLG</Text>
         </View>
 
-        {/* Foto Kelas */}
         <Image
           source={{
             uri: "https://images.unsplash.com/photo-1600172454537-1b7e3b1d8c19",
           }}
           style={styles.classImage}
         />
-
-        {/* Jadwal */}
-        <Text style={styles.sectionTitle}>Jadwal</Text>
-
-        <View style={styles.scheduleList}>
-          {[ 
-            {
-              subject: "Matematika",
-              date: "1 Desember 2027",
-              time: "08.00 - 10.00",
-            },
-            {
-              subject: "Bahasa Indonesia",
-              date: "2 Desember 2027",
-              time: "08.00 - 10.00",
-            },
-            {
-              subject: "Matematika",
-              date: "3 Desember 2027",
-              time: "08.00 - 10.00",
-            },
-          ].map((item, index) => (
-            <View key={index} style={styles.scheduleCard}>
-              <View>
-                <Text style={styles.subjectText}>{item.subject}</Text>
-                <Text style={styles.dateSmall}>{item.date}</Text>
-              </View>
-              <View>
-                <Text style={styles.timeText}>{item.time}</Text>
-                <TouchableOpacity style={styles.startButton}>
-                  <Text style={styles.startText}>Mulai Ujian</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
-        </View>
       </ScrollView>
 
-      {/* FOOTER (pakai yang sama seperti guru) */}
       <Footersiswa activeTab="home" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F6F7FB",
-  },
+  container: { flex: 1, backgroundColor: "#F6F7FB" },
 
   header: {
     backgroundColor: "#2A3FD8",
@@ -124,25 +147,20 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
   },
-  profileContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
+
+  profileContainer: { flexDirection: "row", alignItems: "center" },
+
   profileImage: {
     width: 60,
     height: 60,
     borderRadius: 30,
     marginRight: 15,
   },
-  greeting: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  subGreeting: {
-    color: "#C6D1FF",
-    fontSize: 13,
-  },
+
+  greeting: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+
+  subGreeting: { color: "#C6D1FF", fontSize: 13 },
+
   logoutButton: {
     backgroundColor: "#fff",
     paddingVertical: 5,
@@ -151,10 +169,26 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     marginTop: 10,
   },
-  logoutText: {
-    color: "#2A3FD8",
-    fontWeight: "bold",
+
+  logoutText: { color: "#2A3FD8", fontWeight: "bold" },
+
+  joinContainer: { padding: 20 },
+
+  input: {
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 10,
   },
+
+  joinButton: {
+    backgroundColor: "#2A3FD8",
+    padding: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+
+  joinText: { color: "#fff", fontWeight: "bold" },
 
   dateCard: {
     backgroundColor: "#fff",
@@ -165,12 +199,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     elevation: 4,
   },
+
   dateText: {
     fontSize: 36,
     fontWeight: "bold",
     color: "#2A3FD8",
     marginRight: 15,
   },
+
   dayText: { fontSize: 18, fontWeight: "600" },
   subDayText: { color: "#777" },
   smallText: { fontSize: 12, color: "#777" },
@@ -180,6 +216,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 10,
   },
+
   infoBadge: {
     backgroundColor: "#2A3FD8",
     color: "#fff",
@@ -196,42 +233,4 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginVertical: 15,
   },
-
-  sectionTitle: {
-    marginLeft: 25,
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#222",
-    marginBottom: 10,
-  },
-
-  scheduleList: {
-    paddingHorizontal: 20,
-  },
-
-  scheduleCard: {
-    backgroundColor: "#2A3FD8",
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 15,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-
-  subjectText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  dateSmall: { color: "#C6D1FF", fontSize: 13 },
-  timeText: { color: "#fff", fontSize: 13 },
-
-  startButton: {
-    backgroundColor: "#A8F400",
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-  },
-  startText: { color: "#000", fontWeight: "700" },
 });

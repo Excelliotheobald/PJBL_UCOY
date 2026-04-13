@@ -65,11 +65,11 @@ export default function Guru({ navigation }: any) {
     navigation.navigate('formbuatkelas' as never);
   };
 
-  const handleLogout = async () => {
-    await AsyncStorage.clear();
+ const handleLogout = async () => {
+  await AsyncStorage.removeItem("user");
 
-    navigation.replace('ChooseRole' as never);
-  };
+  navigation.replace("ChooseRole" as never);
+};
   const handleDeleteClass = async (id: string) => {
     Alert.alert('Hapus Kelas', 'Yakin ingin menghapus kelas ini?', [
       { text: 'Batal', style: 'cancel' },
@@ -356,7 +356,7 @@ numberImage: {
 
   classCard: {
   flexDirection: 'row',
-  backgroundColor: '#CFCBFF',
+  backgroundColor: '#D3D2FF',
   padding: 20,
   borderRadius: 16,
   marginHorizontal: 20,
@@ -439,17 +439,18 @@ numberImage: {
 
   wrapper1: {
     padding: 16,
-    backgroundColor: '#F5F6FA',
+   
   },
 
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F9f9f9',
     borderRadius: 18,
     padding: 16,
     marginBottom: 16,
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 12,
+    elevation:3,
   },
 
   activeCard: {},
@@ -494,10 +495,11 @@ numberImage: {
 
   /* TIPS */
   tipsBox: {
-    backgroundColor: '#ECF8DB',
+    backgroundColor: '#f9f9f9',
     padding: 16,
     borderRadius: 18,
     marginTop: 4,
+    elevation:3,
   },
 
   tipsTitle: {

@@ -17,15 +17,15 @@ import type { RootStackParamList } from "../../App";
 const { width } = Dimensions.get("window");
 
 /* ====== PERUBAHAN DISINI ====== */
-const CENTER_BUTTON_SIZE = 65;
-const TAB_BAR_HEIGHT = 105; // ⬆️ DULU 80 → SEKARANG 105 (lebih naik & tebal)
+const CENTER_BUTTON_SIZE = 60;
+const TAB_BAR_HEIGHT = 90; // ⬆️ DULU 80 → SEKARANG 105 (lebih naik & tebal)
 const GAP = 15;
-const CURVE_DEPTH = 55; // ⬆️ DULU 40 → SEKARANG 55 (agar proporsional)
+const CURVE_DEPTH = 48; // ⬆️ DULU 40 → SEKARANG 55 (agar proporsional)
 /* ================================= */
 
 const COLORS = {
   primary: "#1E2CC1",
-  shadow: "#000000",
+  shadow: "#0000",
   subBackground: "#ffffff",
   textActive: "#1E2CC1",
   textInactive: "#9DB2CE",
@@ -92,7 +92,7 @@ export default function Footerguru({ activeTab }: Props) {
         width={width}
         height={TAB_BAR_HEIGHT}
         viewBox={`0 0 ${width} ${TAB_BAR_HEIGHT}`}
-         style={[styles.svg, { bottom: 0.3 }]}
+         style={[styles.svg, { bottom: 0.8 }]}
       >
         <Path d={getPath()} fill={COLORS.shadow}opacity={0.3} />
       </Svg>
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: TAB_BAR_HEIGHT,
     zIndex: 4,
-    elevation: 30,
+    elevation: 50,
     ...Platform.select({
       android: { elevation: 30 },
       ios: {
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: "row",
     height: TAB_BAR_HEIGHT,
-    paddingTop: 10, // dinaikkan sedikit supaya seimbang
+    paddingTop: 5, // dinaikkan sedikit supaya seimbang
     justifyContent: "space-between",
     zIndex: 2,
   },
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   fabInside: {
     width: "100%",
     height: "100%",
-    borderRadius: 100,
+    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
   },

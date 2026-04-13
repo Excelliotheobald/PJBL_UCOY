@@ -19,15 +19,25 @@ export default function FormBuatKelas({ navigation }: any) {
 
   const isFilled = judul && tingkat;
 
+  const generateKode = () => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result.slice(0, 3) + "-" + result.slice(3);
+};
+
   const simpanKelas = async () => {
     if (!isFilled) return;
 
-    const dataBaru = {
+  const dataBaru = {
   id: Date.now().toString(),
   mapel: judul,
   namaKelas: tingkat,
+  kode: generateKode(),   // 🔥 INI PENTING
+  siswa: []               // 🔥 buat nanti nampung siswa
 };
-
     try {
       const dataLama = await AsyncStorage.getItem("kelas");
       let arr = dataLama ? JSON.parse(dataLama) : [];

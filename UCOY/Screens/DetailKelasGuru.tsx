@@ -21,6 +21,7 @@ export default function KelolaKelas({ navigation, route }: any) {
   const { kelas } = route.params || {};
   const mapel = kelas?.mapel || "Mata Pelajaran";
   const tingkat = kelas?.namaKelas || "X";
+  const kodeKelas = kelas?.kode || "-";
   const judulKelas = `${mapel} Kelas ${tingkat}`;
 
   const [activeTab, setActiveTab] = useState("ujian");
@@ -42,7 +43,7 @@ export default function KelolaKelas({ navigation, route }: any) {
   });
 
   const salinKode = () => {
-    const kodeKelas = "M45-13L"; // Bisa diganti dengan kode dinamis jika perlu
+   const kodeKelas = kelas?.kode || "-";
     Alert.alert("Kode tersalin", `Kode ${kodeKelas} telah disalin`);
   };
 
@@ -126,7 +127,7 @@ export default function KelolaKelas({ navigation, route }: any) {
               </TouchableOpacity>
             </View>
           </View>
-          <Text style={styles.codeValue}>M45-13L</Text>
+          <Text style={styles.codeValue}>{kodeKelas}</Text>
           <Text style={styles.codeDescription}>
             Bagikan kode ini ke siswa untuk bergabung ke kelas.
           </Text>
@@ -135,17 +136,16 @@ export default function KelolaKelas({ navigation, route }: any) {
         {/* ===== STATS ===== */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>20</Text>
+            <Text style={styles.statNumber}>
+             {kelas?.siswa?.length || 0}
+            </Text>
             <Text style={styles.statLabel}>Siswa</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>0</Text>
             <Text style={styles.statLabel}>Ujian</Text>
           </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Soal</Text>
-          </View>
+         
         </View>
       </View>
 
