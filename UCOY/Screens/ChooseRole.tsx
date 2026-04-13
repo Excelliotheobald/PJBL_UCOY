@@ -227,38 +227,37 @@ function RegisterView({ onClose, onSwitch, role, navigation }: any) {
   const [password, setPassword] = useState('');
   const isFilled = nama && email && password;
 
-  const handleRegister = async () => {
-    try {
-      await AsyncStorage.setItem('namaUser', nama);
+ const handleRegister = async () => {
+  try {
+    const response = await fetch('http://10.0.2.2:5000/api/users/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nama, email, password, role }),
+    });
 
-      const response = await fetch('http://10.0.2.2:5000/api/users/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nama, email, password, role }),
-      });
+    const data = await response.json();
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        Alert.alert('Gagal', data.message || 'Terjadi kesalahan.');
-        return;
-      }
-
-      Alert.alert('Sukses', 'Registrasi berhasil!');
-
-      // === AUTO LOGIN ===
-      await AsyncStorage.setItem("isLoggedIn", "true");
-      await AsyncStorage.setItem("role", role);
-
-      if (role === 'guru') navigation.navigate('Guru' as never);
-      else navigation.navigate('Siswa' as never);
-
-    } catch (err) {
-      Alert.alert('Error', 'Tidak bisa terhubung ke server.');
-      console.error(err);
+    if (!response.ok) {
+      Alert.alert('Gagal', data.message || 'Terjadi kesalahan.');
+      return;
     }
-  };
 
+    // 🔥 SIMPAN USER LENGKAP (INI YANG PENTING)
+    await AsyncStorage.setItem("user", JSON.stringify({
+      id: data.user?._id || Date.now().toString(),
+      nama: nama,
+      role: role,
+    }));
+
+    Alert.alert('Sukses', 'Registrasi berhasil!');
+
+    if (role === 'guru') navigation.navigate('Guru');
+    else navigation.navigate('Siswa');
+
+  } catch (err) {
+    Alert.alert('Error', 'Tidak bisa terhubung ke server.');
+  }
+};
   return (
     <View style={styles.modalContent}>
       <View style={styles.handle} />
@@ -300,37 +299,36 @@ function LoginView({ onClose, onSwitch, onForgot, navigation }: any) {
   const isFilled = email && password;
 
   const handleLogin = async () => {
-    try {
-      const response = await fetch('http://10.0.2.2:5000/api/users/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, }),
-      });
+  try {
+    const response = await fetch('http://10.0.2.2:5000/api/users/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        Alert.alert('Gagal', data.message || 'Login gagal.');
-        return;
-      }
-
-      await AsyncStorage.setItem('namaUser', data.user.nama);
-await AsyncStorage.setItem('roleUser', data.user.role);
-
-
-      Alert.alert('Berhasil', 'Login sukses!');
-
-      await AsyncStorage.setItem("isLoggedIn", "true");
-      await AsyncStorage.setItem("role", data.user.role);
-
-      if (data.user.role === 'guru') navigation.navigate('Guru' as never);
-      else navigation.navigate('Siswa' as never);
-
-    } catch (err) {
-      Alert.alert('Error', 'Tidak bisa terhubung ke server.');
-      console.error(err);
+    if (!response.ok) {
+      Alert.alert('Gagal', data.message || 'Login gagal.');
+      return;
     }
-  };
+
+    // 🔥 SIMPAN USER LENGKAP (INI KUNCI)
+    await AsyncStorage.setItem("user", JSON.stringify({
+      id: data.user._id,
+      nama: data.user.nama,
+      role: data.user.role,
+    }));
+
+    Alert.alert('Berhasil', 'Login sukses!');
+
+    if (data.user.role === 'guru') navigation.navigate('Guru');
+    else navigation.navigate('Siswa');
+
+  } catch (err) {
+    Alert.alert('Error', 'Tidak bisa terhubung ke server.');
+  }
+};
 
   return (
     <View style={styles.modalContent}>

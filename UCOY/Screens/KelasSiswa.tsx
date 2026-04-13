@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 20,
   },
-
+  
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",

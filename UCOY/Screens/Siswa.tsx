@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -16,14 +16,44 @@ import Footersiswa from "../Components/Footersiswa";
 
 export default function Siswa({ navigation }: any) {
   const [kodeKelas, setKodeKelas] = useState("");
+  const [kelasSaya, setKelasSaya] = useState<any[]>([]); // 🔥 SIMPAN KELAS SISWA
 
-  // ✅ LOGOUT (AMAN)
+  // =========================
+  // 🔥 LOAD KELAS SAAT MASUK
+  // =========================
+  const loadKelas = async () => {
+    const data = await AsyncStorage.getItem("kelas");
+    const userData = await AsyncStorage.getItem("user");
+
+    const list = data ? JSON.parse(data) : [];
+    const user = userData ? JSON.parse(userData) : null;
+
+    if (!user) return;
+
+    // 🔥 FILTER kelas yg dia ikuti
+    const kelasUser = list.filter((k: any) =>
+      k.siswa?.some((s: any) => s.id === user.id)
+    );
+
+    setKelasSaya(kelasUser);
+  };
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", loadKelas);
+    return unsubscribe;
+  }, [navigation]);
+
+  // =========================
+  // ✅ LOGOUT
+  // =========================
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("user"); // ❗ jangan clear semua
+    await AsyncStorage.removeItem("user");
     navigation.replace("ChooseRole");
   };
 
+  // =========================
   // ✅ JOIN KELAS
+  // =========================
   const handleJoinKelas = async () => {
     const data = await AsyncStorage.getItem("kelas");
     let list = data ? JSON.parse(data) : [];
@@ -35,36 +65,40 @@ export default function Siswa({ navigation }: any) {
       return;
     }
 
-    // ✅ ambil user login
     const userData = await AsyncStorage.getItem("user");
     const user = userData ? JSON.parse(userData) : null;
 
-    const namaUser = user?.nama || "Siswa";
+    if (!user) {
+      Alert.alert("User tidak ditemukan");
+      return;
+    }
 
-    // ✅ buat array siswa kalau belum ada
     if (!kelasDitemukan.siswa) {
       kelasDitemukan.siswa = [];
     }
 
-    // ✅ CEGAH DUPLIKAT (FIX DISINI)
+    // 🔥 CEGAH DUPLIKAT (PAKAI ID)
     const sudahMasuk = kelasDitemukan.siswa.find(
-      (s: any) => s.nama === namaUser
+      (s: any) => s.id === user.id
     );
 
     if (!sudahMasuk) {
       kelasDitemukan.siswa.push({
-        nama: namaUser,
+        id: user.id,
+        nama: user.nama,
       });
     }
 
-    // ✅ update storage
     const updated = list.map((k: any) =>
       k.id === kelasDitemukan.id ? kelasDitemukan : k
     );
 
     await AsyncStorage.setItem("kelas", JSON.stringify(updated));
 
-    // ✅ pindah ke halaman kelas siswa
+    // 🔥 reload kelas biar muncul card
+    loadKelas();
+
+    // 🔥 langsung masuk kelas
     navigation.navigate("KelasSiswa", { kelas: kelasDitemukan });
   };
 
@@ -106,6 +140,27 @@ export default function Siswa({ navigation }: any) {
             <Text style={styles.joinText}>Gabung Kelas</Text>
           </TouchableOpacity>
         </View>
+
+        {/* ========================= */}
+        {/* 🔥 CARD KELAS SISWA */}
+        {/* ========================= */}
+        {kelasSaya.map((kelas, index) => (
+          <View key={index} style={styles.cardKelas}>
+            <Text style={styles.cardTitle}>{kelas.mapel}</Text>
+            <Text style={styles.cardSubtitle}>
+              Kelas {kelas.namaKelas}
+            </Text>
+
+            <TouchableOpacity
+              style={styles.masukButton}
+              onPress={() =>
+                navigation.navigate("KelasSiswa", { kelas })
+              }
+            >
+              <Text style={styles.masukText}>Masuk Kelas</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
 
         {/* Dummy UI */}
         <View style={styles.dateCard}>
@@ -189,6 +244,38 @@ const styles = StyleSheet.create({
   },
 
   joinText: { color: "#fff", fontWeight: "bold" },
+
+  // 🔥 CARD KELAS
+  cardKelas: {
+    backgroundColor: "#fff",
+    marginHorizontal: 20,
+    marginBottom: 10,
+    padding: 15,
+    borderRadius: 12,
+    elevation: 3,
+  },
+
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  cardSubtitle: {
+    color: "gray",
+    marginBottom: 10,
+  },
+
+  masukButton: {
+    backgroundColor: "#2A3FD8",
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+
+  masukText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
 
   dateCard: {
     backgroundColor: "#fff",
