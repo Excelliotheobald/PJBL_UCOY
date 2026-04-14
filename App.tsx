@@ -12,6 +12,7 @@ import Profilesiswa from './UCOY/Screens/Profilesiswa';
 import formbuatkelas from './UCOY/Screens/formbuatkelas';
 import DetailKelasGuru from './UCOY/Screens/DetailKelasGuru';
 import KelasSiswa from './UCOY/Screens/KelasSiswa';
+import Formbuatsoal from './UCOY/Screens/Formbuatsoal';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -24,6 +25,7 @@ export type RootStackParamList = {
   formbuatkelas: undefined;
   DetailKelasGuru: { kelas: any };
   KelasSiswa : undefined;
+ Formbuatsoal: { kelas: any };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -46,6 +48,7 @@ export default function App() {
         <Stack.Screen name="formbuatkelas" component={formbuatkelas} />
         <Stack.Screen name="DetailKelasGuru" component={DetailKelasGuru} />
         <Stack.Screen name="KelasSiswa" component={KelasSiswa} />
+        <Stack.Screen name="Formbuatsoal" component={Formbuatsoal} />
       </Stack.Navigator>
     </NavigationContainer>
   );

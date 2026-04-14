@@ -38,8 +38,12 @@ export default function Guru({ navigation }: any) {
 
   useEffect(() => {
     const loadData = async () => {
-      const savedName = await AsyncStorage.getItem('namaUser');
-      if (savedName) setNama(savedName);
+     const savedUser = await AsyncStorage.getItem("user");
+
+if (savedUser) {
+  const parsed = JSON.parse(savedUser);
+  setNama(parsed.nama);
+}
 
       // 🟩 Ambil data kelas
       const savedClass = await AsyncStorage.getItem('kelas');

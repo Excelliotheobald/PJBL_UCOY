@@ -88,7 +88,15 @@ export default function KelolaKelas({ navigation, route }: any) {
 
       {/* ===== HEADER ===== */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.side} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+  style={styles.side}
+  onPress={() =>
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Guru" }],
+    })
+  }
+>
           <ChevronLeft size={28} color="#fff" />
         </TouchableOpacity>
 
@@ -179,7 +187,10 @@ export default function KelolaKelas({ navigation, route }: any) {
       >
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Soal Ujian</Text>
-          <TouchableOpacity style={styles.createButton}>
+          <TouchableOpacity
+  style={styles.createButton}
+  onPress={() => navigation.navigate("Formbuatsoal", { kelas })}
+>
             <Plus size={20} color="#fff" />
             <Text style={styles.createButtonText}>Buat Soal Ujian</Text>
           </TouchableOpacity>

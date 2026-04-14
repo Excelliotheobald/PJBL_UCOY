@@ -25,7 +25,33 @@ export default function ChooseRole() {
   const [showForgot, setShowForgot] = useState(false);
 
   const navigation = useNavigation();
+useEffect(() => {
+  const checkLogin = async () => {
+    try {
+      const user = await AsyncStorage.getItem("user");
 
+      if (user) {
+        const parsed = JSON.parse(user);
+
+        if (parsed.role === "guru") {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "Guru" as never }],
+          });
+        } else {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "Siswa" as never }],
+          });
+        }
+      }
+    } catch (error) {
+      console.log("Error check login:", error);
+    }
+  };
+
+  checkLogin();
+}, []);
   const floatAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(height)).current;

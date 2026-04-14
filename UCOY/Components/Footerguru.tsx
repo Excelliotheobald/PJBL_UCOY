@@ -16,35 +16,46 @@ import type { RootStackParamList } from "../../App";
 
 const { width } = Dimensions.get("window");
 
-/* ====== PERUBAHAN DISINI ====== */
-const CENTER_BUTTON_SIZE = 60;
-const TAB_BAR_HEIGHT = 90; // ⬆️ DULU 80 → SEKARANG 105 (lebih naik & tebal)
-const GAP = 15;
-const CURVE_DEPTH = 48; // ⬆️ DULU 40 → SEKARANG 55 (agar proporsional)
-/* ================================= */
+/* ===== FIXED SIZE (MATCHED TO YOUR IMAGE) ===== */
+const CENTER_BUTTON_SIZE = 72;
+const TAB_BAR_HEIGHT = 80;
+const GAP = 8;
+const CURVE_DEPTH = 40;
+const TAB_BAR_BORDER_RADIUS = 24;
+/* ============================================= */
 
 const COLORS = {
-  primary: "#1E2CC1",
-  shadow: "#0000",
+  primary: "#1A1CAD", // dark blue exactly like your image
   subBackground: "#ffffff",
-  textActive: "#1E2CC1",
-  textInactive: "#9DB2CE",
+  textActive: "#1A1CAD",
+  textInactive: "#9CB1CD",
 };
 
-const R = CENTER_BUTTON_SIZE / 1.5;
-const CX = width / 2;
-const X1 = CX - R - GAP;
-const X2 = CX + R + GAP;
+// Curve math for perfect semi-circle notch
+const FAB_RADIUS = CENTER_BUTTON_SIZE / 2;
+const CX = width / 2; // center X of screen
+const LEFT_NOTCH_X = CX - FAB_RADIUS - GAP; // start of the notch
+const RIGHT_NOTCH_X = CX + FAB_RADIUS + GAP; // end of the notch
 const H = TAB_BAR_HEIGHT;
 
+
+/* ===== ✅ FIXED: NO COMMENTS INSIDE SVG PATH! ===== */
 const getPath = () => `
-  M 0 0
-  L ${X1} 0
-  C ${X1 + 20} 0, ${X1 + 10} ${CURVE_DEPTH}, ${CX} ${CURVE_DEPTH}
-  C ${X2 - 10} ${CURVE_DEPTH}, ${X2 - 20} 0, ${X2} 0
-  L ${width} 0
+  M ${TAB_BAR_BORDER_RADIUS} 0
+  L ${LEFT_NOTCH_X - 8} 0
+
+  C ${LEFT_NOTCH_X + 8} 0, ${LEFT_NOTCH_X} ${CURVE_DEPTH}, ${CX} ${CURVE_DEPTH}
+
+  C ${RIGHT_NOTCH_X} ${CURVE_DEPTH}, ${RIGHT_NOTCH_X - 8} 0, ${RIGHT_NOTCH_X + 8} 0
+
+  L ${width - TAB_BAR_BORDER_RADIUS} 0
+
+  Q ${width} 0 ${width} ${TAB_BAR_BORDER_RADIUS}
   L ${width} ${H}
   L 0 ${H}
+  L 0 ${TAB_BAR_BORDER_RADIUS}
+
+  Q 0 0 ${TAB_BAR_BORDER_RADIUS} 0
   Z
 `;
 
@@ -56,19 +67,19 @@ export default function Footerguru({ activeTab }: Props) {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
+  // Glow animation for FAB
   const glowAnim = useRef(new Animated.Value(0.9)).current;
-
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
         Animated.timing(glowAnim, {
-          toValue: 1.6,
-          duration: 700,
+          toValue: 1.3,
+          duration: 1100,
           useNativeDriver: false,
         }),
         Animated.timing(glowAnim, {
           toValue: 0.9,
-          duration: 700,
+          duration: 1100,
           useNativeDriver: false,
         }),
       ])
@@ -77,43 +88,39 @@ export default function Footerguru({ activeTab }: Props) {
 
   const glowStyle = {
     shadowColor: COLORS.primary,
-    shadowOpacity: 1,
+    shadowOpacity: 0.45,
     shadowRadius: glowAnim.interpolate({
-      inputRange: [0.9, 1.6],
-      outputRange: [20, 40],
+      inputRange: [0.9, 1.3],
+      outputRange: [12, 28],
     }),
-    shadowOffset: { width: 0, height: 0 },
+    shadowOffset: { width: 0, height: 4 },
   };
+
 
   return (
     <View style={styles.footerWrapper}>
-      {/* SVG Background */}
-      <Svg
-        width={width}
-        height={TAB_BAR_HEIGHT}
-        viewBox={`0 0 ${width} ${TAB_BAR_HEIGHT}`}
-         style={[styles.svg, { bottom: 0.8 }]}
-      >
-        <Path d={getPath()} fill={COLORS.shadow}opacity={0.3} />
+      {/* Soft shadow layer (under tab bar) */}
+      <Svg width={width} height={TAB_BAR_HEIGHT} style={styles.svgShadow}>
+        <Path d={getPath()} fill="rgba(0,0,0,0.07)" />
       </Svg>
 
-       <Svg
-        width={width}
-        height={TAB_BAR_HEIGHT}
-        viewBox={`0 0 ${width} ${TAB_BAR_HEIGHT}`}
-        style={styles.svg}
-      >
-        <Path d={getPath()} fill={COLORS.subBackground} />
-      </Svg>
+      {/* Main tab bar background */}
+      <View style={styles.backgroundWrapper}>
+        <Svg width={width} height={TAB_BAR_HEIGHT}>
+          <Path d={getPath()} fill={COLORS.subBackground} />
+        </Svg>
+      </View>
 
-      {/* Tab Buttons */}
+
+      {/* Tab Buttons Container */}
       <View style={styles.tabContainer}>
+        {/* HOME / BERANDA TAB */}
         <TouchableOpacity
-          style={styles.tabLeft}
+          style={styles.tab}
           onPress={() => navigation.navigate("Guru")}
         >
           <House
-            size={30}
+            size={32}
             color={
               activeTab === "home"
                 ? COLORS.textActive
@@ -135,14 +142,16 @@ export default function Footerguru({ activeTab }: Props) {
           </Text>
         </TouchableOpacity>
 
+        {/* Spacer for FAB notch */}
         <View style={styles.centerSpacer} />
 
+        {/* PROFILE TAB */}
         <TouchableOpacity
-          style={styles.tabRight}
+          style={styles.tab}
           onPress={() => navigation.navigate("Profileguru")}
         >
           <UserRound
-            size={30}
+            size={32}
             color={
               activeTab === "profile"
                 ? COLORS.textActive
@@ -165,13 +174,14 @@ export default function Footerguru({ activeTab }: Props) {
         </TouchableOpacity>
       </View>
 
-      {/* Floating Button */}
+
+      {/* FLOATING CENTER BUTTON */}
       <Animated.View style={[styles.fabButton, glowStyle]}>
         <TouchableOpacity
           onPress={() => navigation.navigate("formbuatkelas")}
           style={styles.fabInside}
         >
-          <Plus size={32} color="#fff" />
+          <Plus size={36} color="#ffffff" strokeWidth={2.8} />
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -184,61 +194,50 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: "100%",
     height: TAB_BAR_HEIGHT,
-    zIndex: 4,
-    elevation: 50,
-    ...Platform.select({
-      android: { elevation: 30 },
-      ios: {
-        shadowColor: "#000",
-        shadowOpacity: 0.4,
-        shadowOffset: { width: 0, height: -4 },
-        shadowRadius: 10,
-      },
-    }),
+    zIndex: 10,
+    elevation: 24,
   },
 
-  svg: {
+  svgShadow: {
+    position: "absolute",
+    bottom: -2,
+    opacity: 0.8,
+  },
+
+  backgroundWrapper: {
     position: "absolute",
     bottom: 0,
-    zIndex: 1,
+    overflow: "hidden",
   },
 
   tabContainer: {
     flexDirection: "row",
     height: TAB_BAR_HEIGHT,
-    paddingTop: 5, // dinaikkan sedikit supaya seimbang
     justifyContent: "space-between",
-    zIndex: 2,
+    alignItems: "center",
+    paddingHorizontal: 16,
   },
 
-  tabLeft: {
+  tab: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingLeft: 20,
-  },
-
-  tabRight: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingRight: 20,
+    paddingTop: 8,
   },
 
   centerSpacer: {
-    width: CENTER_BUTTON_SIZE + GAP * 2 + 30,
+    width: CENTER_BUTTON_SIZE + (GAP * 2) + 16,
   },
 
   text: {
-    fontSize: 12,
-    marginTop: 2,
-    fontWeight: "600",
+    fontSize: 14,
+    marginTop: 4,
+    fontWeight: "500",
   },
 
   fabButton: {
-    marginTop: 10,
     position: "absolute",
-    top: -CURVE_DEPTH + 15,
+    top: -(CURVE_DEPTH), // perfectly align FAB inside the notch
     left: width / 2 - CENTER_BUTTON_SIZE / 2,
     width: CENTER_BUTTON_SIZE,
     height: CENTER_BUTTON_SIZE,
@@ -246,16 +245,17 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 3,
-    borderWidth: 1,
-    borderColor: "#3246ff",
+    borderWidth: 0,
+
+    // Platform shadow fixes
     ...Platform.select({
       android: {
-        elevation: 10,
+        elevation: 12,
       },
       ios: {
-        shadowColor: "#1E2CC1",
-        shadowOffset: { width: 0, height: 0 },
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.5,
       },
     }),
   },
@@ -263,7 +263,6 @@ const styles = StyleSheet.create({
   fabInside: {
     width: "100%",
     height: "100%",
-    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
   },
