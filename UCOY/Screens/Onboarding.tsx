@@ -20,18 +20,18 @@ const { width, height } = Dimensions.get('window');
 type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 
 export default function Onboarding({ navigation }: Props) {
-  useEffect(() => {
-    const checkLogin = async () => {
-      const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
-      const role = await AsyncStorage.getItem('role');
+ useEffect(() => {
+  const checkLogin = async () => {
+    const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
+    const role = await AsyncStorage.getItem('role');
 
-      if (isLoggedIn === 'true') {
-        if (role === 'guru') navigation.replace('Guru');
-        else navigation.replace('Siswa');
-      }
-    };
-    checkLogin();
-  }, []);
+    if (isLoggedIn === 'true') {
+      if (role === 'guru') navigation.replace('Guru');
+      else navigation.replace('Siswa');
+    }
+  };
+  checkLogin();
+}, []);
   // ⭐ END PENAMBAHAN
 
   const scrollRef = useRef<ScrollView>(null);

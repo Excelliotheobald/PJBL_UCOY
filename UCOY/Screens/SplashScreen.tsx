@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useRef } from 'react';
 import { StyleSheet, View, Dimensions } from 'react-native';
 import Video from 'react-native-video';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,29 +11,32 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Splash'>;
 
 export default function SplashScreen({ navigation }: Props) {
 
-  useEffect(() => {
-    const checkLogin = async () => {
-      const isLoggedIn = await AsyncStorage.getItem("isLoggedIn");
-      const role = await AsyncStorage.getItem("role"); // kalau kamu pakai role
+  const hasNavigated = useRef(false); // 🔥 cegah double navigate
 
-      // Jika sudah pernah login → langsung dashboard
-      if (isLoggedIn === "true") {
-        if (role === "guru") navigation.replace("Guru");
-        else if (role === "siswa") navigation.replace("Siswa");
-        else navigation.replace("Guru"); // default kalau tak ada role
-        return;
+  const checkLogin = async () => {
+    if (hasNavigated.current) return;
+    hasNavigated.current = true;
+
+    try {
+      const user = await AsyncStorage.getItem("user");
+
+      if (user) {
+        const parsed = JSON.parse(user);
+
+        if (parsed.role === "guru") {
+          navigation.replace("Guru");
+        } else if (parsed.role === "siswa") {
+          navigation.replace("Siswa");
+        } else {
+          navigation.replace("Guru");
+        }
+      } else {
+        navigation.replace("Onboarding");
       }
-
-      // Jika belum login → ke onboarding
+    } catch (error) {
       navigation.replace("Onboarding");
-    };
-
-    // 🔥 (1) TIMER dan (2) onEnd LOGIN CHECK — DILETAKKAN BERDEKATAN
-    const timer = setTimeout(() => {
-      checkLogin();
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, [navigation]);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -44,29 +47,14 @@ export default function SplashScreen({ navigation }: Props) {
         muted
         repeat={false}
         paused={false}
-       controls={false}          
-  fullscreen={false}          
-  disableFocus={true}        
-  playInBackground={false}    
-  playWhenInactive={false}     
+        controls={false}
+        fullscreen={false}
+        disableFocus={true}
+        playInBackground={false}
+        playWhenInactive={false}
 
-        onEnd={() => {
-          // jika video selesai lebih cepat → tetap cek login
-          // bukan langsung Onboarding
-          (async () => {
-            const isLoggedIn = await AsyncStorage.getItem("isLoggedIn");
-            const role = await AsyncStorage.getItem("role");
-
-            if (isLoggedIn === "true") {
-              if (role === "guru") navigation.replace("Guru");
-              else if (role === "siswa") navigation.replace("Siswa");
-              else navigation.replace("Guru");
-            } else {
-              navigation.replace("Onboarding");
-            }
-          })();
-        }}
-
+        // ✅ cukup pakai ini saja
+        onEnd={checkLogin}
       />
     </View>
   );

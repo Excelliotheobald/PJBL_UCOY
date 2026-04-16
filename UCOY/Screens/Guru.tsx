@@ -26,6 +26,7 @@ interface KelasType {
   id: string;
   namaKelas: string;
   mapel: string;
+  siswa: any[];
 }
 
 const { width } = Dimensions.get('window');
@@ -35,6 +36,8 @@ export default function Guru({ navigation }: any) {
   const [nama, setNama] = useState('');
   const [showDropdown, setShowDropdown] = useState(false); // dropdaun
   const [kelas, setKelas] = useState<KelasType[]>([]);
+  
+  
 
   useEffect(() => {
     const loadData = async () => {
@@ -51,9 +54,12 @@ if (savedUser) {
   const parsed = JSON.parse(savedClass);
 
   // 🔥 filter data biar cuma yang valid
-  const cleanData = parsed.filter(
-    (item: any) => item.mapel && item.namaKelas
-  );
+  const cleanData = parsed
+  .filter((item: any) => item.mapel && item.namaKelas)
+  .map((item: any) => ({
+    ...item,
+    siswa: Array.isArray(item.siswa) ? item.siswa : [], // 🔥 penting
+  }));
 
   setKelas(cleanData);
 }else {
@@ -318,8 +324,8 @@ if (savedUser) {
                    {item.mapel} Kelas {item.namaKelas}
                     </Text>
                   <Text style={styles.subText}>
-      20 Siswa • 1 Ujian Aktif
-    </Text>
+                    {Array.isArray(item.siswa) ? item.siswa.length : 0} Siswa
+                  </Text>
                   </View>
 
                   <TouchableOpacity

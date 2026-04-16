@@ -8,19 +8,43 @@ import {
   SafeAreaView,
   Platform,
   StatusBar,
-  Image
+  Image,
+  Alert,
 } from "react-native";
 import { ChevronLeft } from "lucide-react-native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../App";
 
-export default function Formbuatsoal({ navigation }: any) {
+// ✅ TYPE HARUS DI ATAS
+type Props = NativeStackScreenProps<
+  RootStackParamList,
+  "Formbuatsoal"
+>;
+
+export default function Formbuatsoal({ navigation }: Props) {
   const [judul, setJudul] = useState("");
   const [tanggal, setTanggal] = useState("");
   const [waktu, setWaktu] = useState("");
   const [durasi, setDurasi] = useState("");
+  const [jumlahSoal, setJumlahSoal] = useState("");
+
+  // ✅ SATU handleNext saja
+  const handleNext = () => {
+    if (!judul || !tanggal || !waktu || !durasi || !jumlahSoal) {
+      Alert.alert("Semua field harus diisi!");
+      return;
+    }
+
+    console.log("NAVIGATE KE BUAT SOAL");
+
+    navigation.navigate("BuatSoalDetail", {
+      jumlahSoal: Number(jumlahSoal),
+    });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* ===== HEADER (SAMA PERSIS) ===== */}
+      {/* HEADER */}
       <View style={styles.headerWrapper}>
         <Image
           source={require("./tulis.png")}
@@ -33,7 +57,7 @@ export default function Formbuatsoal({ navigation }: any) {
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.side}
-            onPress={() => navigation.navigate("DetailKelasGuru")}
+            onPress={() => navigation.goBack()}
           >
             <ChevronLeft size={26} color="#fff" />
           </TouchableOpacity>
@@ -44,13 +68,12 @@ export default function Formbuatsoal({ navigation }: any) {
         </View>
       </View>
 
-      {/* ===== CARD ===== */}
+      {/* CARD */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Informasi Ujian</Text>
 
         <Text style={styles.label}>Judul Ujian</Text>
         <TextInput
-          placeholder=""
           value={judul}
           onChangeText={setJudul}
           style={styles.input}
@@ -58,22 +81,57 @@ export default function Formbuatsoal({ navigation }: any) {
 
         {/* TANGGAL & WAKTU */}
         <View style={styles.row}>
+          {/* TANGGAL */}
           <View style={{ flex: 1 }}>
             <Text style={styles.label}>Tanggal</Text>
             <TextInput
-              placeholder="hh/bb/tt"
+              placeholder="dd/mm/yyyy"
               value={tanggal}
-              onChangeText={setTanggal}
+              onChangeText={(text) => {
+                let cleaned = text.replace(/[^0-9]/g, "");
+                if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
+
+                let formatted = cleaned;
+
+                if (cleaned.length > 4) {
+                  formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(
+                    2,
+                    4
+                  )}/${cleaned.slice(4)}`;
+                } else if (cleaned.length > 2) {
+                  formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+                }
+
+                setTanggal(formatted);
+              }}
+              keyboardType="numeric"
               style={styles.input}
             />
           </View>
 
+          {/* WAKTU */}
           <View style={{ flex: 1 }}>
             <Text style={styles.label}>Waktu</Text>
             <TextInput
-              placeholder="--:--"
+              placeholder="--:-- sampai --:--"
               value={waktu}
-              onChangeText={setWaktu}
+              onChangeText={(text) => {
+                let cleaned = text.replace(/[^0-9]/g, "");
+                if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
+
+                let result = "";
+
+                if (cleaned.length >= 1) result = cleaned.slice(0, 2);
+                if (cleaned.length >= 3)
+                  result += ":" + cleaned.slice(2, 4);
+                if (cleaned.length >= 5)
+                  result += " - " + cleaned.slice(4, 6);
+                if (cleaned.length >= 7)
+                  result += ":" + cleaned.slice(6, 8);
+
+                setWaktu(result);
+              }}
+              keyboardType="numeric"
               style={styles.input}
             />
           </View>
@@ -81,15 +139,29 @@ export default function Formbuatsoal({ navigation }: any) {
 
         <Text style={styles.label}>Durasi (Menit)</Text>
         <TextInput
-          placeholder="90"
+          placeholder="Tentukan Durasi Ujianmu"
           value={durasi}
-          onChangeText={setDurasi}
+          onChangeText={(text) =>
+            setDurasi(text.replace(/[^0-9]/g, ""))
+          }
+          keyboardType="numeric"
+          style={styles.input}
+        />
+
+        <Text style={styles.label}>Jumlah Soal</Text>
+        <TextInput
+          placeholder="Tentukan berapa Soal mu"
+          value={jumlahSoal}
+          onChangeText={(text) =>
+            setJumlahSoal(text.replace(/[^0-9]/g, ""))
+          }
+          keyboardType="numeric"
           style={styles.input}
         />
       </View>
 
-      {/* ===== BUTTON ===== */}
-      <TouchableOpacity style={styles.nextButton}>
+      {/* BUTTON */}
+      <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
         <Text style={styles.nextText}>Selanjutnya</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -97,14 +169,9 @@ export default function Formbuatsoal({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f4f6f8",
-  },
+  container: { flex: 1, backgroundColor: "#f4f6f8" },
 
-  headerWrapper: {
-    position: "relative",
-  },
+  headerWrapper: { position: "relative" },
 
   bgImage: {
     position: "absolute",
@@ -142,10 +209,7 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
 
-  side: {
-    width: 40,
-    alignItems: "center",
-  },
+  side: { width: 40, alignItems: "center" },
 
   headerTitle: {
     color: "#fff",
@@ -160,7 +224,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     elevation: 5,
-    zIndex:2,
+    zIndex: 2,
   },
 
   cardTitle: {
@@ -189,6 +253,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     gap: 10,
+    alignItems: "flex-end",
   },
 
   nextButton: {

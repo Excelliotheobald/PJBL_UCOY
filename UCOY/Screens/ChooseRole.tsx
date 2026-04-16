@@ -23,6 +23,7 @@ export default function ChooseRole() {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
+  
 
   const navigation = useNavigation();
 useEffect(() => {
