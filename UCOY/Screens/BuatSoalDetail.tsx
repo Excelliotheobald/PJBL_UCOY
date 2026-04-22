@@ -285,14 +285,14 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
+    
   },
 
   btnBack: {
     flex: 1,
     borderWidth: 1.5,
     borderColor: "#B2DF20",
-    paddingVertical: 14,
+    paddingVertical: 15,
     borderRadius: 14,
     alignItems: "center",
     marginRight: 10,
