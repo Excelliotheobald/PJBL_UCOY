@@ -21,29 +21,26 @@ type Props = NativeStackScreenProps<
 
 export default function BuatSoalDetail({ route, navigation }: Props) {
 
-  
   const { jumlahSoal } = route.params;
-
   const insets = useSafeAreaInsets();
 
-  // 🔥 soal aktif
   const [currentSoal, setCurrentSoal] = useState<number>(0);
 
-  // 🔥 array soal
   const soalArray = Array.from({ length: jumlahSoal });
 
-      const [soalData, setSoalData] = useState(
-  Array.from({ length: jumlahSoal }, () => ({
-    pertanyaan: "",
-    pilihan: ["", "", "", "", ""],
-    jawabanBenar: null as number | null,
-  }))
-);
+  const [soalData, setSoalData] = useState(
+    Array.from({ length: jumlahSoal }, () => ({
+      pertanyaan: "",
+      pilihan: ["", "", "", "", ""],
+      jawabanBenar: null as number | null,
+    }))
+  );
 
   return (
     <SafeAreaView style={styles.container}>
+      
       {/* HEADER */}
-     <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={{ fontSize: 20 }}>✕</Text>
         </TouchableOpacity>
@@ -77,79 +74,81 @@ export default function BuatSoalDetail({ route, navigation }: Props) {
 
       <View style={styles.separator} />
 
-      {/* CONTENT */}
-      <View style={styles.content}>
+      {/* ✅ CONTENT (SUDAH BISA SCROLL) */}
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
+        keyboardShouldPersistTaps="handled"
+      >
         <Text style={styles.sectionTitle}>
           Edit Soal #{currentSoal + 1}
         </Text>
 
         <Text style={{ marginTop: 10 }}>Pertanyaan</Text>
         <TextInput
-  value={soalData[currentSoal].pertanyaan}
-  onChangeText={(text) => {
-    const newData = [...soalData];
-    newData[currentSoal].pertanyaan = text;
-    setSoalData(newData);
-  }}
-  placeholder="Tulis pertanyaan di sini..."
-  style={styles.box}
-/>
+          value={soalData[currentSoal].pertanyaan}
+          onChangeText={(text) => {
+            const newData = [...soalData];
+            newData[currentSoal].pertanyaan = text;
+            setSoalData(newData);
+          }}
+          placeholder="Tulis pertanyaan di sini..."
+          style={styles.box}
+          multiline
+        />
 
-         <TouchableOpacity> 
-          
-          <Text style={{ marginTop: 12, color: "#1D1A9B",fontWeight: "500" }}>
-          <Image color={"#1D1A9B"} size={15} /> Posting Gambar (Opsional)
-        </Text>
-        
+        <TouchableOpacity>
+          <Text style={{ marginTop: 12, color: "#1D1A9B", fontWeight: "500" }}>
+            <Image color={"#1D1A9B"} size={15} /> Posting Gambar (Opsional)
+          </Text>
         </TouchableOpacity>
-       
 
         <Text style={{ marginTop: 15 }}>Pilihan Jawaban</Text>
 
         {["A", "B", "C", "D", "E"].map((item, i) => (
           <View key={i} style={styles.option}>
-           <TouchableOpacity
-  style={[
-    styles.radio,
-    soalData[currentSoal].jawabanBenar === i && {
-      backgroundColor: "#1D1A9B",
-      borderColor: "#1D1A9B",
-    },
-  ]}
-  onPress={() => {
-    const newData = [...soalData];
-    newData[currentSoal].jawabanBenar = i;
-    setSoalData(newData);
-  }}
-/>
-            <TextInput
-  value={soalData[currentSoal].pilihan[i]}
-  onChangeText={(text) => {
-    const newData = [...soalData];
-    newData[currentSoal].pilihan[i] = text;
-    setSoalData(newData);
-  }}
-  placeholder={`${item}. Pilih jawaban ${item}`}
-  style={styles.inputFake}
-/>
+            
+            {/* RADIO */}
+            <TouchableOpacity
+              style={[
+                styles.radio,
+                soalData[currentSoal].jawabanBenar === i && {
+                  backgroundColor: "#1D1A9B",
+                  borderColor: "#1D1A9B",
+                },
+              ]}
+              onPress={() => {
+                const newData = [...soalData];
+                newData[currentSoal].jawabanBenar = i;
+                setSoalData(newData);
+              }}
+            />
+
+            {/* INPUT */}
+            <View style={styles.inputWrapper}>
+              <Text style={styles.optionInside}>{item}.</Text>
+
+              <TextInput
+                value={soalData[currentSoal].pilihan[i]}
+                onChangeText={(text) => {
+                  const newData = [...soalData];
+                  newData[currentSoal].pilihan[i] = text;
+                  setSoalData(newData);
+                }}
+                placeholder="Tulis jawaban..."
+                style={styles.inputText}
+              />
+            </View>
           </View>
         ))}
 
-        <Text style={{ marginTop: 10, fontSize: 12 }}>
+        <Text style={{ marginBottom: 30, fontSize: 12, padding: 5, marginTop: 10 }}>
           Tekan ikon centang untuk menandai jawaban benar.
         </Text>
 
-        <View style={styles.bobotRow}>
-          <Text>Bobot Nilai</Text>
-          <View style={styles.bobotBox}>
-            <Text>0</Text>
-          </View>
-          <Text>poin</Text>
-        </View>
-
         {/* BUTTON */}
         <View style={styles.buttonRow}>
-          {/* 🔥 TOMBOL KEMBALI FIX */}
           <TouchableOpacity
             style={styles.btnBack}
             onPress={() => {
@@ -165,7 +164,6 @@ export default function BuatSoalDetail({ route, navigation }: Props) {
             </Text>
           </TouchableOpacity>
 
-          {/* NEXT */}
           <TouchableOpacity
             style={styles.btnNext}
             onPress={() => {
@@ -183,7 +181,7 @@ export default function BuatSoalDetail({ route, navigation }: Props) {
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -196,58 +194,55 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
-paddingTop: 50,
-paddingBottom: 8,
+    paddingTop: 50,
+    paddingBottom: 8,
   },
 
- title: {
-  fontSize: 18,
-  fontWeight: "600",
-},
+  title: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
 
   circle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 50,
+    height: 50,
+    borderRadius: 100,
     backgroundColor: "#ccc",
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 10,
+    marginVertical: 10,
   },
 
   circleActive: {
     backgroundColor: "#1D1A9B",
   },
 
-circleText: {
-  color: "#fff",
-  fontWeight: "600",
-  fontSize: 13,
-},
+  circleText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 13,
+  },
 
   content: {
-   
-    margin: 15,
-     marginHorizontal: 16,
-  marginTop: 10,
-   paddingHorizontal: 16,
-paddingTop: 10,
-paddingBottom: 8,
+    marginHorizontal: 16,
+    marginTop: 10,
+    paddingHorizontal: 16,
+    paddingTop: 10,
   },
 
   sectionTitle: { fontSize: 16, fontWeight: "bold" },
 
-box: {
-  height: 85,
-  borderWidth: 1,
-  borderColor: "#DADADA",
-  borderRadius: 12,
-  marginTop: 8,
-  paddingHorizontal: 12,
-  paddingTop: 10,
-
-  textAlignVertical: "top", // 🔥 ini paling penting (biar mulai dari atas)
-},
+  box: {
+    height: 85,
+    borderWidth: 1,
+    borderColor: "#DADADA",
+    borderRadius: 12,
+    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    textAlignVertical: "top",
+  },
 
   option: {
     flexDirection: "row",
@@ -255,42 +250,38 @@ box: {
     marginTop: 12,
   },
 
-radio: {
-  width: 22,
-  height: 22,
-  borderRadius: 11,
-  borderWidth: 1.5,
-  borderColor: "#CFCFCF",
-  marginRight: 10,
-  justifyContent: "center",
-  alignItems: "center",
-},
+  radio: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    borderColor: "#CFCFCF",
+    marginRight: 10,
+  },
 
- inputFake: {
-  flex: 1,
-  borderWidth: 1,
-  borderColor: "#DADADA",
-  paddingVertical: 12,
-  paddingHorizontal: 12,
-  borderRadius: 12,
-},
+  inputWrapper: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#DADADA",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+  },
 
- bobotRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginTop: 16,
-},
+  optionInside: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginRight: 8,
+    color: "#333",
+  },
 
- bobotBox: {
-  borderWidth: 1,
-  borderColor: "#DADADA",
-  borderRadius: 6,
-  width: 45,
-  height: 28,
-  justifyContent: "center",
-  alignItems: "center",
-  marginHorizontal: 6,
-},
+  inputText: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: 14,
+  },
+
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -302,10 +293,10 @@ radio: {
     borderWidth: 1.5,
     borderColor: "#B2DF20",
     paddingVertical: 14,
-  borderRadius: 14,
-  alignItems: "center",
-  marginRight: 10,
-  backgroundColor: "#F4FBE7",
+    borderRadius: 14,
+    alignItems: "center",
+    marginRight: 10,
+    backgroundColor: "#F4FBE7",
   },
 
   btnNext: {
@@ -316,9 +307,9 @@ radio: {
     alignItems: "center",
   },
 
-   separator: {
-    height: 1, // Ketebalan garis
-    backgroundColor: '#CED0CE', // Warna garis
-    width: '100%', // Lebar garis
+  separator: {
+    height: 1,
+    backgroundColor: "#CED0CE",
+    width: "100%",
   },
 });
