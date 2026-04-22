@@ -29,19 +29,28 @@ export default function Formbuatsoal({ navigation }: Props) {
   const [jumlahSoal, setJumlahSoal] = useState("");
 
   // ✅ SATU handleNext saja
-  const handleNext = () => {
-    if (!judul || !tanggal || !waktu || !durasi || !jumlahSoal) {
-      Alert.alert("Semua field harus diisi!");
-      return;
-    }
+  const isValidTime = (time: string) => {
+  const regex = /^([01]\d|2[0-3]):([0-5]\d) - ([01]\d|2[0-3]):([0-5]\d)$/;
+  return regex.test(time);
+};
 
-    console.log("NAVIGATE KE BUAT SOAL");
+const handleNext = () => {
+  // 🔥 validasi kosong dulu
+  if (!judul || !tanggal || !waktu || !durasi || !jumlahSoal) {
+    Alert.alert("Semua field harus diisi!");
+    return;
+  }
 
-    navigation.navigate("BuatSoalDetail", {
-      jumlahSoal: Number(jumlahSoal),
-    });
-  };
+  // 🔥 validasi waktu
+  if (!isValidTime(waktu)) {
+    Alert.alert("Format waktu tidak valid!");
+    return;
+  }
 
+  navigation.navigate("BuatSoalDetail", {
+    jumlahSoal: Number(jumlahSoal),
+  });
+};
   return (
     <SafeAreaView style={styles.container}>
       {/* HEADER */}
@@ -87,23 +96,20 @@ export default function Formbuatsoal({ navigation }: Props) {
             <TextInput
               placeholder="dd/mm/yyyy"
               value={tanggal}
-              onChangeText={(text) => {
-                let cleaned = text.replace(/[^0-9]/g, "");
-                if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
+           onChangeText={(text) => {
+  let cleaned = text.replace(/[^0-9]/g, "");
+  if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
 
-                let formatted = cleaned;
+  let formatted = cleaned;
 
-                if (cleaned.length > 4) {
-                  formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(
-                    2,
-                    4
-                  )}/${cleaned.slice(4)}`;
-                } else if (cleaned.length > 2) {
-                  formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
-                }
+  if (cleaned.length > 4) {
+    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4)}`;
+  } else if (cleaned.length > 2) {
+    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+  }
 
-                setTanggal(formatted);
-              }}
+  setTanggal(formatted);
+}}
               keyboardType="numeric"
               style={styles.input}
             />
@@ -116,21 +122,41 @@ export default function Formbuatsoal({ navigation }: Props) {
               placeholder="--:-- sampai --:--"
               value={waktu}
               onChangeText={(text) => {
-                let cleaned = text.replace(/[^0-9]/g, "");
-                if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
+  let cleaned = text.replace(/[^0-9]/g, "");
+  if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
 
-                let result = "";
+  let jamMulai = cleaned.slice(0, 2);
+  let menitMulai = cleaned.slice(2, 4);
+  let jamAkhir = cleaned.slice(4, 6);
+  let menitAkhir = cleaned.slice(6, 8);
 
-                if (cleaned.length >= 1) result = cleaned.slice(0, 2);
-                if (cleaned.length >= 3)
-                  result += ":" + cleaned.slice(2, 4);
-                if (cleaned.length >= 5)
-                  result += " - " + cleaned.slice(4, 6);
-                if (cleaned.length >= 7)
-                  result += ":" + cleaned.slice(6, 8);
+  // 🔥 VALIDASI JAM (0–23)
+  if (jamMulai.length === 2 && parseInt(jamMulai) > 23) {
+    jamMulai = "23";
+  }
 
-                setWaktu(result);
-              }}
+  if (jamAkhir.length === 2 && parseInt(jamAkhir) > 23) {
+    jamAkhir = "23";
+  }
+
+  // 🔥 VALIDASI MENIT (0–59)
+  if (menitMulai.length === 2 && parseInt(menitMulai) > 59) {
+    menitMulai = "59";
+  }
+
+  if (menitAkhir.length === 2 && parseInt(menitAkhir) > 59) {
+    menitAkhir = "59";
+  }
+
+  let result = "";
+
+  if (jamMulai) result = jamMulai;
+  if (menitMulai) result += ":" + menitMulai;
+  if (jamAkhir) result += " - " + jamAkhir;
+  if (menitAkhir) result += ":" + menitAkhir;
+
+  setWaktu(result);
+}}
               keyboardType="numeric"
               style={styles.input}
             />
