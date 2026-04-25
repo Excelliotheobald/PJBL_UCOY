@@ -14,6 +14,9 @@ import DetailKelasGuru from './UCOY/Screens/DetailKelasGuru';
 import KelasSiswa from './UCOY/Screens/KelasSiswa';
 import Formbuatsoal from './UCOY/Screens/Formbuatsoal';
 import BuatSoalDetail from './UCOY/Screens/BuatSoalDetail';
+import EditProfileGuru from './UCOY/Screens/EditProfileGuru';
+import DetailUjian from './UCOY/Screens/DetailUjian';
+
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -24,10 +27,22 @@ export type RootStackParamList = {
   Profileguru: undefined;
   Profilesiswa: undefined;
   formbuatkelas: undefined;
-  DetailKelasGuru: { kelas: any };
+  DetailKelasGuru: {
+    kelas: any;
+    ujianBaru?: any;
+  };
+
+  BuatSoalDetail: {
+     jumlahSoal: number,
+  kelas: any
+  };
   KelasSiswa : undefined;
  Formbuatsoal: { kelas: any };
- BuatSoalDetail :{ jumlahSoal : number };
+ EditProfileGuru: undefined
+ DetailUjian: {
+  ujian: any;
+  kelas: any;
+};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -52,6 +67,8 @@ export default function App() {
         <Stack.Screen name="KelasSiswa" component={KelasSiswa} />
         <Stack.Screen name="Formbuatsoal" component={Formbuatsoal} />
        <Stack.Screen name="BuatSoalDetail" component={BuatSoalDetail} />
+        <Stack.Screen name="EditProfileGuru" component={EditProfileGuru} />
+        <Stack.Screen name="DetailUjian" component={DetailUjian} />
       </Stack.Navigator>
     </NavigationContainer>
   );

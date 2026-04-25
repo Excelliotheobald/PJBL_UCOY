@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,53 +10,51 @@ import {
   StatusBar,
   Image,
   Alert,
-} from "react-native";
-import { ChevronLeft } from "lucide-react-native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../App";
+} from 'react-native';
+import { ChevronLeft } from 'lucide-react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../App';
 
 // ✅ TYPE HARUS DI ATAS
-type Props = NativeStackScreenProps<
-  RootStackParamList,
-  "Formbuatsoal"
->;
+type Props = NativeStackScreenProps<RootStackParamList, 'Formbuatsoal'>;
 
-export default function Formbuatsoal({ navigation }: Props) {
-  const [judul, setJudul] = useState("");
-  const [tanggal, setTanggal] = useState("");
-  const [waktu, setWaktu] = useState("");
-  const [durasi, setDurasi] = useState("");
-  const [jumlahSoal, setJumlahSoal] = useState("");
+export default function Formbuatsoal({ navigation, route }: any) {
+  const [judul, setJudul] = useState('');
+  const [tanggal, setTanggal] = useState('');
+  const [waktu, setWaktu] = useState('');
+  const [durasi, setDurasi] = useState('');
+  const [jumlahSoal, setJumlahSoal] = useState('');
 
   // ✅ SATU handleNext saja
   const isValidTime = (time: string) => {
-  const regex = /^([01]\d|2[0-3]):([0-5]\d) - ([01]\d|2[0-3]):([0-5]\d)$/;
-  return regex.test(time);
-};
+    const regex = /^([01]\d|2[0-3]):([0-5]\d) - ([01]\d|2[0-3]):([0-5]\d)$/;
+    return regex.test(time);
+  };
 
-const handleNext = () => {
-  // 🔥 validasi kosong dulu
-  if (!judul || !tanggal || !waktu || !durasi || !jumlahSoal) {
-    Alert.alert("Semua field harus diisi!");
-    return;
-  }
+  const handleNext = () => {
+    // 🔥 validasi kosong dulu
+    if (!judul || !tanggal || !waktu || !durasi || !jumlahSoal) {
+      Alert.alert('Semua field harus diisi!');
+      return;
+    }
 
-  // 🔥 validasi waktu
-  if (!isValidTime(waktu)) {
-    Alert.alert("Format waktu tidak valid!");
-    return;
-  }
+    // 🔥 validasi waktu
+    if (!isValidTime(waktu)) {
+      Alert.alert('Format waktu tidak valid!');
+      return;
+    }
 
-  navigation.navigate("BuatSoalDetail", {
-    jumlahSoal: Number(jumlahSoal),
-  });
-};
+    navigation.navigate('BuatSoalDetail', {
+      jumlahSoal: parseInt(jumlahSoal),
+      kelas: route.params.kelas,
+    });
+  };
   return (
     <SafeAreaView style={styles.container}>
       {/* HEADER */}
       <View style={styles.headerWrapper}>
         <Image
-          source={require("./tulis.png")}
+          source={require('./tulis.png')}
           style={styles.bgImage}
           resizeMode="contain"
         />
@@ -82,11 +80,7 @@ const handleNext = () => {
         <Text style={styles.cardTitle}>Informasi Ujian</Text>
 
         <Text style={styles.label}>Judul Ujian</Text>
-        <TextInput
-          value={judul}
-          onChangeText={setJudul}
-          style={styles.input}
-        />
+        <TextInput value={judul} onChangeText={setJudul} style={styles.input} />
 
         {/* TANGGAL & WAKTU */}
         <View style={styles.row}>
@@ -96,20 +90,23 @@ const handleNext = () => {
             <TextInput
               placeholder="dd/mm/yyyy"
               value={tanggal}
-           onChangeText={(text) => {
-  let cleaned = text.replace(/[^0-9]/g, "");
-  if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
+              onChangeText={text => {
+                let cleaned = text.replace(/[^0-9]/g, '');
+                if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
 
-  let formatted = cleaned;
+                let formatted = cleaned;
 
-  if (cleaned.length > 4) {
-    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4)}`;
-  } else if (cleaned.length > 2) {
-    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
-  }
+                if (cleaned.length > 4) {
+                  formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(
+                    2,
+                    4,
+                  )}/${cleaned.slice(4)}`;
+                } else if (cleaned.length > 2) {
+                  formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+                }
 
-  setTanggal(formatted);
-}}
+                setTanggal(formatted);
+              }}
               keyboardType="numeric"
               style={styles.input}
             />
@@ -121,42 +118,42 @@ const handleNext = () => {
             <TextInput
               placeholder="--:-- sampai --:--"
               value={waktu}
-              onChangeText={(text) => {
-  let cleaned = text.replace(/[^0-9]/g, "");
-  if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
+              onChangeText={text => {
+                let cleaned = text.replace(/[^0-9]/g, '');
+                if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
 
-  let jamMulai = cleaned.slice(0, 2);
-  let menitMulai = cleaned.slice(2, 4);
-  let jamAkhir = cleaned.slice(4, 6);
-  let menitAkhir = cleaned.slice(6, 8);
+                let jamMulai = cleaned.slice(0, 2);
+                let menitMulai = cleaned.slice(2, 4);
+                let jamAkhir = cleaned.slice(4, 6);
+                let menitAkhir = cleaned.slice(6, 8);
 
-  // 🔥 VALIDASI JAM (0–23)
-  if (jamMulai.length === 2 && parseInt(jamMulai) > 23) {
-    jamMulai = "23";
-  }
+                // 🔥 VALIDASI JAM (0–23)
+                if (jamMulai.length === 2 && parseInt(jamMulai) > 23) {
+                  jamMulai = '23';
+                }
 
-  if (jamAkhir.length === 2 && parseInt(jamAkhir) > 23) {
-    jamAkhir = "23";
-  }
+                if (jamAkhir.length === 2 && parseInt(jamAkhir) > 23) {
+                  jamAkhir = '23';
+                }
 
-  // 🔥 VALIDASI MENIT (0–59)
-  if (menitMulai.length === 2 && parseInt(menitMulai) > 59) {
-    menitMulai = "59";
-  }
+                // 🔥 VALIDASI MENIT (0–59)
+                if (menitMulai.length === 2 && parseInt(menitMulai) > 59) {
+                  menitMulai = '59';
+                }
 
-  if (menitAkhir.length === 2 && parseInt(menitAkhir) > 59) {
-    menitAkhir = "59";
-  }
+                if (menitAkhir.length === 2 && parseInt(menitAkhir) > 59) {
+                  menitAkhir = '59';
+                }
 
-  let result = "";
+                let result = '';
 
-  if (jamMulai) result = jamMulai;
-  if (menitMulai) result += ":" + menitMulai;
-  if (jamAkhir) result += " - " + jamAkhir;
-  if (menitAkhir) result += ":" + menitAkhir;
+                if (jamMulai) result = jamMulai;
+                if (menitMulai) result += ':' + menitMulai;
+                if (jamAkhir) result += ' - ' + jamAkhir;
+                if (menitAkhir) result += ':' + menitAkhir;
 
-  setWaktu(result);
-}}
+                setWaktu(result);
+              }}
               keyboardType="numeric"
               style={styles.input}
             />
@@ -167,9 +164,7 @@ const handleNext = () => {
         <TextInput
           placeholder="Tentukan Durasi Ujianmu"
           value={durasi}
-          onChangeText={(text) =>
-            setDurasi(text.replace(/[^0-9]/g, ""))
-          }
+          onChangeText={text => setDurasi(text.replace(/[^0-9]/g, ''))}
           keyboardType="numeric"
           style={styles.input}
         />
@@ -178,9 +173,7 @@ const handleNext = () => {
         <TextInput
           placeholder="Tentukan berapa Soal mu"
           value={jumlahSoal}
-          onChangeText={(text) =>
-            setJumlahSoal(text.replace(/[^0-9]/g, ""))
-          }
+          onChangeText={text => setJumlahSoal(text.replace(/[^0-9]/g, ''))}
           keyboardType="numeric"
           style={styles.input}
         />
@@ -195,14 +188,14 @@ const handleNext = () => {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f4f6f8" },
+  container: { flex: 1, backgroundColor: '#f4f6f8' },
 
-  headerWrapper: { position: "relative" },
+  headerWrapper: { position: 'relative' },
 
   bgImage: {
-    position: "absolute",
+    position: 'absolute',
     top: 10,
-    alignSelf: "center",
+    alignSelf: 'center',
     width: 300,
     height: 300,
     opacity: 0.3,
@@ -211,40 +204,39 @@ const styles = StyleSheet.create({
   },
 
   glow: {
-    position: "absolute",
+    position: 'absolute',
     bottom: -35,
     left: 20,
     right: 20,
     height: 70,
-    backgroundColor: "#1D1A9B",
+    backgroundColor: '#1D1A9B',
     opacity: 0.5,
     borderRadius: 50,
   },
 
   header: {
-    backgroundColor: "#1D1A9B",
+    backgroundColor: '#1D1A9B',
     height: 200,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop:
-      Platform.OS === "android" ? StatusBar.currentHeight : 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 20,
     paddingBottom: 100,
     borderBottomLeftRadius: 25,
     borderBottomRightRadius: 25,
     elevation: 10,
   },
 
-  side: { width: 40, alignItems: "center" },
+  side: { width: 40, alignItems: 'center' },
 
   headerTitle: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 23,
-    fontWeight: "500",
+    fontWeight: '500',
   },
 
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     marginHorizontal: 16,
     marginTop: -70,
     padding: 16,
@@ -255,7 +247,7 @@ const styles = StyleSheet.create({
 
   cardTitle: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
     marginBottom: 10,
   },
 
@@ -263,37 +255,37 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 5,
     fontSize: 14,
-    color: "#333",
+    color: '#333',
   },
 
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     borderRadius: 8,
     padding: 10,
     fontSize: 14,
-    backgroundColor: "#fafafa",
+    backgroundColor: '#fafafa',
     marginBottom: 10,
   },
 
   row: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 10,
-    alignItems: "flex-end",
+    alignItems: 'flex-end',
   },
 
   nextButton: {
     marginTop: 20,
     marginHorizontal: 16,
-    backgroundColor: "#B2DF20",
+    backgroundColor: '#B2DF20',
     padding: 15,
     borderRadius: 12,
-    alignItems: "center",
+    alignItems: 'center',
   },
 
   nextText: {
-    color: "#fff",
-    fontWeight: "600",
+    color: '#fff',
+    fontWeight: '600',
     fontSize: 16,
   },
 });

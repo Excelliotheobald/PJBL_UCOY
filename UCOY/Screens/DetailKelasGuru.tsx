@@ -15,14 +15,21 @@ import { ChevronLeft, Plus, Trash2 } from "lucide-react-native";
 import { Animated } from "react-native";
 import { useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
+
+
 
 export default function KelolaKelas({ navigation, route }: any) {
-  // Ambil data kelas dari parameter navigasi
-  const { kelas } = route.params || {};
+  const { kelas, ujianBaru } = route.params || {};
+
   const mapel = kelas?.mapel || "Mata Pelajaran";
   const tingkat = kelas?.namaKelas || "X";
   const kodeKelas = kelas?.kode || "-";
   const judulKelas = `${mapel} Kelas ${tingkat}`;
+
+  const [ujianList, setUjianList] = useState<any[]>([]);
 
   const [activeTab, setActiveTab] = useState("ujian");
   const translateX = useRef(new Animated.Value(0)).current;
@@ -43,46 +50,86 @@ export default function KelolaKelas({ navigation, route }: any) {
   });
 
   const salinKode = () => {
-   const kodeKelas = kelas?.kode || "-";
     Alert.alert("Kode tersalin", `Kode ${kodeKelas} telah disalin`);
   };
 
-  // Fungsi hapus kelas dengan konfirmasi
   const handleDeleteClass = () => {
-    Alert.alert(
-      "Hapus Kelas",
-      `Apakah Anda yakin ingin menghapus kelas "${judulKelas}"?`,
-      [
-        {
-          text: "Batal",
-          style: "cancel",
+  Alert.alert(
+    "Hapus Kelas",
+    `Apakah Anda yakin ingin menghapus kelas "${judulKelas}"?`,
+    [
+      {
+        text: "Batal",
+        style: "cancel",
+      },
+      {
+        text: "Hapus",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            const stored = await AsyncStorage.getItem("kelas");
+            let list: any[] = stored ? JSON.parse(stored) : [];
+
+            const updated = list.filter(
+              (item) => item.id !== kelas?.id
+            );
+
+            await AsyncStorage.setItem(
+              "kelas",
+              JSON.stringify(updated)
+            );
+
+            navigation.goBack();
+          } catch (error) {
+            console.log("Gagal menghapus kelas:", error);
+            Alert.alert("Error", "Gagal menghapus kelas.");
+          }
         },
-        {
-          text: "Hapus",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              // Ambil data kelas dari AsyncStorage
-              const stored = await AsyncStorage.getItem("kelas");
-              let list: any[] = stored ? JSON.parse(stored) : [];
-              // Filter hapus kelas berdasarkan id
-              const updated = list.filter((item) => item.id !== kelas?.id);
-              // Simpan kembali
-              await AsyncStorage.setItem("kelas", JSON.stringify(updated));
-              // Kembali ke halaman Guru
-              navigation.goBack();
-            } catch (error) {
-              console.log("Gagal menghapus kelas:", error);
-              Alert.alert("Error", "Gagal menghapus kelas. Silakan coba lagi.");
-            }
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+      },
+    ],
+    { cancelable: true }
+  );
+};
+
+  // =========================
+  // 🔥 SAVE ke AsyncStorage
+  // =========================
+  const saveUjian = async (data: any[]) => {
+    try {
+      await AsyncStorage.setItem(
+        `ujian_${kelas.id}`,
+        JSON.stringify(data)
+      );
+    } catch (e) {
+      console.log("Gagal simpan ujian", e);
+    }
   };
 
-  return (
+  
+
+  // =========================
+  // 🔥 LOAD pertama kali
+  // =========================
+  useFocusEffect(
+  useCallback(() => {
+    const loadUjian = async () => {
+      try {
+        const stored = await AsyncStorage.getItem(`ujian_${kelas.id}`);
+        if (stored) {
+          setUjianList(JSON.parse(stored));
+        } else {
+          setUjianList([]);
+        }
+      } catch (e) {
+        console.log("Gagal load ujian", e);
+      }
+    };
+
+    loadUjian();
+  }, [kelas.id])
+);
+
+return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#1D1A9B" />
 
@@ -108,11 +155,13 @@ export default function KelolaKelas({ navigation, route }: any) {
         </TouchableOpacity>
       </View>
 
-      <Image
-        source={require("./tulis.png")}
-        style={styles.bgImage}
-        resizeMode="contain"
-      />
+<View pointerEvents="none">
+  <Image
+    source={require("./tulis.png")}
+    style={styles.bgImage}
+    resizeMode="contain"
+  />
+</View>
 
       {/* ===== CARD ===== */}
       <View style={styles.codeCard}>
@@ -144,15 +193,15 @@ export default function KelolaKelas({ navigation, route }: any) {
         {/* ===== STATS ===== */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>
-             {kelas?.siswa?.length || 0}
-            </Text>
-            <Text style={styles.statLabel}>Siswa</Text>
+          <Text style={styles.statNumber}>
+  {kelas?.siswa?.length || 0}
+</Text>
+<Text style={styles.statLabel}>Siswa</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Ujian</Text>
-          </View>
+  <Text style={styles.statNumber}>{ujianList.length}</Text>
+  <Text style={styles.statLabel}>Ujian</Text>
+</View>
          
         </View>
       </View>
@@ -187,13 +236,82 @@ export default function KelolaKelas({ navigation, route }: any) {
       >
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Soal Ujian</Text>
-          <TouchableOpacity
-  style={styles.createButton}
-  onPress={() => navigation.navigate("Formbuatsoal", { kelas })}
+          {ujianList.map((item: any, index) => (
+  <TouchableOpacity
+    key={index}
+    style={styles.card}
+    activeOpacity={0.8}
+    onPress={() => {
+      console.log("CARD DIKLIK"); // 🔥 taruh di sini
+      navigation.navigate("DetailUjian", {
+        ujian: item,
+        kelas,
+      });
+    }}
+  >
+
+    {/* HEADER */}
+    <View style={styles.cardHeader}>
+      <Text style={styles.cardTitle}>{item.judul}</Text>
+    <TouchableOpacity
+  onPress={(e) => {
+    e.stopPropagation(); // 🔥 INI KUNCI TERAKHIR
+    Alert.alert(
+      "Hapus Ujian",
+      "Yakin ingin menghapus ujian ini?",
+      [
+        { text: "Batal", style: "cancel" },
+        {
+          text: "Hapus",
+          style: "destructive",
+          onPress: () => {
+            const updated = ujianList.filter((_, i) => i !== index);
+            setUjianList(updated);
+            saveUjian(updated);
+          },
+        },
+      ]
+    );
+  }}
 >
-            <Plus size={20} color="#fff" />
-            <Text style={styles.createButtonText}>Buat Soal Ujian</Text>
-          </TouchableOpacity>
+  <Text style={{ fontSize: 18 }}>⋮</Text>
+</TouchableOpacity>
+    </View>
+
+    {/* INFO */}
+    <Text style={styles.cardSub}>
+      {item.jumlahSoal} Soal • {item.tanggal} • {item.durasi}
+    </Text>
+
+    {/* PROGRESS */}
+    <View style={styles.progressBg}>
+      <View style={styles.progressFill} />
+    </View>
+
+    {/* STATUS */}
+    <View style={styles.statusRow}>
+      <Text style={styles.statusSelesai}>
+        {item.selesai} Selesai
+      </Text>
+      <Text style={styles.statusKerja}>
+        {item.dikerjakan} Mengerjakan
+      </Text>
+      <Text style={styles.statusBelum}>
+        {item.belum} Belum
+      </Text>
+    </View>
+
+  </TouchableOpacity>
+))}
+         
+  <TouchableOpacity
+    style={styles.createButton}
+    onPress={() => navigation.navigate("Formbuatsoal", { kelas })}
+  >
+    <Plus size={20} color="#fff" />
+    <Text style={styles.createButtonText}>Buat Soal Ujian</Text>
+  </TouchableOpacity>
+
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -408,17 +526,78 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     color: "#1a1a1a",
   },
-  createButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#B2DF20",
-    borderRadius: 12,
-    paddingVertical: 12,
-    gap: 8,
-  },
+ createButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: "#B2DF20",
+  borderRadius: 12,
+  paddingVertical: 12,
+  gap: 8,
+  marginTop: 20, // 🔥 tambah ini
+},
   createButtonText: {
     color: "#fff",
     fontWeight: "600",
   },
+
+  card: {
+  backgroundColor: "#fff",
+  marginTop: 12,
+  borderRadius: 14,
+  padding: 14,
+  elevation: 3,
+},
+
+cardHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+},
+
+cardTitle: {
+  fontSize: 15,
+  fontWeight: "600",
+},
+
+cardSub: {
+  fontSize: 12,
+  color: "#666",
+  marginTop: 4,
+},
+
+progressBg: {
+  height: 6,
+  backgroundColor: "#eee",
+  borderRadius: 10,
+  marginTop: 10,
+},
+
+progressFill: {
+  width: "0%", // nanti kita bikin dinamis
+  height: "100%",
+  backgroundColor: "#1D1A9B",
+  borderRadius: 10,
+},
+
+statusRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginTop: 8,
+},
+
+statusSelesai: {
+  color: "green",
+  fontSize: 12,
+},
+
+statusKerja: {
+  color: "#f5a623",
+  fontSize: 12,
+},
+
+statusBelum: {
+  color: "red",
+  fontSize: 12,
+},
 });

@@ -11,8 +11,9 @@ import {
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../App";
-import { Image } from "lucide-react-native";
+import { Image, Check } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -21,7 +22,7 @@ type Props = NativeStackScreenProps<
 
 export default function BuatSoalDetail({ route, navigation }: Props) {
 
-  const { jumlahSoal } = route.params;
+  const { jumlahSoal, kelas } = route.params;
   const insets = useSafeAreaInsets();
 
   const [currentSoal, setCurrentSoal] = useState<number>(0);
@@ -35,6 +36,21 @@ export default function BuatSoalDetail({ route, navigation }: Props) {
       jawabanBenar: null as number | null,
     }))
   );
+
+  const simpanSoal = async (dataBaru: any) => {
+  try {
+    const key = `ujian_${kelas.id}`;
+
+    const stored = await AsyncStorage.getItem(key);
+    let list = stored ? JSON.parse(stored) : [];
+
+    list.push(dataBaru);
+
+    await AsyncStorage.setItem(key, JSON.stringify(list));
+  } catch (e) {
+    console.log("Gagal simpan soal", e);
+  }
+};
 
   return (
     <SafeAreaView style={styles.container}>
@@ -65,7 +81,12 @@ export default function BuatSoalDetail({ route, navigation }: Props) {
             ]}
             onPress={() => setCurrentSoal(index)}
           >
-            <Text style={styles.circleText}>
+            <Text
+              style={[
+                styles.circleText,
+                currentSoal === index && { color: "#fff" }
+              ]}
+            >
               {String(index + 1).padStart(2, "0")}
             </Text>
           </TouchableOpacity>
@@ -74,7 +95,7 @@ export default function BuatSoalDetail({ route, navigation }: Props) {
 
       <View style={styles.separator} />
 
-      {/* ✅ CONTENT (SUDAH BISA SCROLL) */}
+      {/* CONTENT */}
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
@@ -113,21 +134,34 @@ export default function BuatSoalDetail({ route, navigation }: Props) {
             <TouchableOpacity
               style={[
                 styles.radio,
-                soalData[currentSoal].jawabanBenar === i && {
-                  backgroundColor: "#1D1A9B",
-                  borderColor: "#1D1A9B",
-                },
+                soalData[currentSoal].jawabanBenar === i && styles.radioActive,
               ]}
               onPress={() => {
                 const newData = [...soalData];
                 newData[currentSoal].jawabanBenar = i;
                 setSoalData(newData);
               }}
-            />
+            >
+              {soalData[currentSoal].jawabanBenar === i && (
+                <Check size={14} color="#fff" />
+              )}
+            </TouchableOpacity>
 
-            {/* INPUT */}
-            <View style={styles.inputWrapper}>
-              <Text style={styles.optionInside}>{item}.</Text>
+            {/* CARD */}
+            <View
+              style={[
+                styles.inputWrapper,
+                soalData[currentSoal].jawabanBenar === i && styles.inputActive
+              ]}
+            >
+              <Text
+                style={[
+                  styles.optionInside,
+                  soalData[currentSoal].jawabanBenar === i && { color: "#fff" }
+                ]}
+              >
+                {item}.
+              </Text>
 
               <TextInput
                 value={soalData[currentSoal].pilihan[i]}
@@ -137,7 +171,13 @@ export default function BuatSoalDetail({ route, navigation }: Props) {
                   setSoalData(newData);
                 }}
                 placeholder="Tulis jawaban..."
-                style={styles.inputText}
+                placeholderTextColor={
+                  soalData[currentSoal].jawabanBenar === i ? "#fff" : "#999"
+                }
+                style={[
+                  styles.inputText,
+                  soalData[currentSoal].jawabanBenar === i && { color: "#fff" }
+                ]}
               />
             </View>
           </View>
@@ -166,14 +206,28 @@ export default function BuatSoalDetail({ route, navigation }: Props) {
 
           <TouchableOpacity
             style={styles.btnNext}
-            onPress={() => {
-              if (currentSoal < jumlahSoal - 1) {
-                setCurrentSoal(currentSoal + 1);
-              } else {
-                Alert.alert("Soal selesai dibuat!");
-              }
-            }}
-          >
+          onPress={async () => {
+  if (currentSoal < jumlahSoal - 1) {
+    setCurrentSoal(currentSoal + 1);
+  } else {
+    const dataUjian = {
+      id: Date.now(),
+      judul: "Ujian Matematika",
+      jumlahSoal: jumlahSoal,
+      soal: soalData,
+
+      selesai: 0,
+      dikerjakan: 0,
+      belum: jumlahSoal,
+      tanggal: "1 Des 2027",
+      durasi: "90 Menit",
+    };
+
+    await simpanSoal(dataUjian); // 🔥 INI KUNCI
+    navigation.goBack(); // 🔥 balik ke KelolaKelas
+  }
+}}
+    >
             <Text style={{ color: "#fff" }}>
               {currentSoal === jumlahSoal - 1
                 ? "Publikasikan"
@@ -187,7 +241,7 @@ export default function BuatSoalDetail({ route, navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f4f4f4" },
+  container: { flex: 1, backgroundColor: "#fff" },
 
   header: {
     flexDirection: "row",
@@ -207,7 +261,8 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 100,
-    backgroundColor: "#ccc",
+    borderColor: "#ccc",
+    borderWidth: 2,
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 10,
@@ -216,12 +271,13 @@ const styles = StyleSheet.create({
 
   circleActive: {
     backgroundColor: "#1D1A9B",
+    borderWidth: 0,
   },
 
   circleText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 13,
+    color: "#999",
+    fontWeight: "500",
+    fontSize: 15,
   },
 
   content: {
@@ -251,12 +307,19 @@ const styles = StyleSheet.create({
   },
 
   radio: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1.5,
-    borderColor: "#CFCFCF",
+    width: 32,
+    height: 32,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#bbb",
     marginRight: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  radioActive: {
+    backgroundColor: "#1D1A9B",
+    borderWidth: 0,
   },
 
   inputWrapper: {
@@ -267,6 +330,11 @@ const styles = StyleSheet.create({
     borderColor: "#DADADA",
     borderRadius: 12,
     paddingHorizontal: 12,
+  },
+
+  inputActive: {
+    backgroundColor: "#1D1A9B",
+    borderColor: "#1D1A9B",
   },
 
   optionInside: {
@@ -285,7 +353,6 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    
   },
 
   btnBack: {
