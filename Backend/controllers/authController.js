@@ -1,6 +1,7 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import nodemailer from "nodemailer";
 
 /* ======================
         REGISTER
@@ -9,12 +10,15 @@ export const register = async (req, res) => {
   const { nama, email, password, role } = req.body;
 
   try {
-    // validasi
-    if (!nama || !email || !password) {
+    if (!nama || !email || !password || !role) {
       return res.status(400).json({ message: "Semua field wajib diisi" });
     }
 
-    const exists = await User.findOne({ email });
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password minimal 6 karakter" });
+    }
+
+    const exists = await User.findOne({ email: email.toLowerCase() });
     if (exists) {
       return res.status(400).json({ message: "Email sudah digunakan" });
     }
@@ -23,12 +27,11 @@ export const register = async (req, res) => {
 
     const user = await User.create({
       nama,
-      email,
+      email: email.toLowerCase(),
       password: hashed,
       role,
     });
 
-    // ❌ jangan kirim password
     const { password: _, ...userData } = user.toObject();
 
     res.json({ message: "Register sukses", user: userData });
@@ -49,7 +52,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Email & password wajib diisi" });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(404).json({ message: "Email tidak ditemukan" });
     }
@@ -59,7 +62,6 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Password salah" });
     }
 
-    // ❌ jangan kirim password
     const { password: _, ...userData } = user.toObject();
 
     res.json({ message: "Login sukses", user: userData });
@@ -70,7 +72,7 @@ export const login = async (req, res) => {
 };
 
 /* ======================
-      FORGOT PASSWORD
+      FORGOT PASSWORD (OTP)
 ====================== */
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
@@ -80,17 +82,19 @@ export const forgotPassword = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
 
-    // 🔐 biar tidak bocorin email
     if (!user) {
       return res.json({
-        message: "Jika email terdaftar, link reset akan dikirim",
+        message: "Jika email terdaftar, kode akan dikirim",
       });
     }
 
-    // ✅ token di-hash (lebih aman)
-    const resetToken = crypto.randomBytes(32).toString("hex");
+    // 🔥 GENERATE OTP
+    const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log("🔥 OTP:", resetToken); // <-- LIAT DI TERMINAL
+
+    // 🔥 HASH TOKEN
     const hashedToken = crypto
       .createHash("sha256")
       .update(resetToken)
@@ -101,13 +105,24 @@ export const forgotPassword = async (req, res) => {
 
     await user.save();
 
-    console.log(
-      `RESET LINK: http://localhost:3000/reset-password/${resetToken}`
-    );
-
-    res.json({
-      message: "Link reset password telah dikirim",
+    // EMAIL
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
     });
+
+    await transporter.sendMail({
+      from: `"UcoyApp" <${process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject: "Kode OTP Reset Password",
+      html: `<h1>${resetToken}</h1><p>Berlaku 15 menit</p>`,
+    });
+
+    res.json({ message: "Kode dikirim ke email" });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -115,46 +130,107 @@ export const forgotPassword = async (req, res) => {
 };
 
 /* ======================
-      RESET PASSWORD
+      VERIFY TOKEN
 ====================== */
-export const resetPassword = async (req, res) => {
-  const { token } = req.params;
-  const { password } = req.body;
-
+export const verifyResetToken = async (req, res) => {
   try {
-    if (!password) {
-      return res.status(400).json({ message: "Password wajib diisi" });
+    const { email, token } = req.body;
+
+    console.log("EMAIL:", email);
+    console.log("TOKEN INPUT:", token);
+
+    if (!email || !token) {
+      return res.status(400).json({ message: "Email & kode wajib diisi" });
     }
 
-    // hash token dari URL
+    const cleanToken = String(token).trim();
+
     const hashedToken = crypto
       .createHash("sha256")
-      .update(token)
+      .update(cleanToken)
       .digest("hex");
 
     const user = await User.findOne({
-      resetPasswordToken: hashedToken,
+      email: email.toLowerCase(),
     });
 
     if (!user) {
-      return res.status(400).json({ message: "Token tidak valid" });
+      return res.status(404).json({ message: "User tidak ditemukan" });
+    }
+
+    console.log("DB TOKEN:", user.resetPasswordToken);
+    console.log("HASHED TOKEN:", hashedToken);
+
+    // 🔥 VALIDASI MANUAL (LEBIH AMAN)
+    if (user.resetPasswordToken !== hashedToken) {
+      return res.status(400).json({ message: "Kode salah" });
     }
 
     if (user.resetPasswordExpire < Date.now()) {
-      return res.status(400).json({ message: "Token expired" });
+      return res.status(400).json({ message: "Kode expired" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    res.json({ message: "Kode valid" });
 
-    user.password = hashedPassword;
+  } catch (err) {
+    console.error("VERIFY ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/* ======================
+      RESET PASSWORD
+====================== */
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, token, password } = req.body;
+
+    console.log("EMAIL:", email);
+    console.log("TOKEN:", token);
+    console.log("PASSWORD:", password);
+
+    // 🔥 FIX DI SINI
+    if (!email || !token || !password) {
+      return res.status(400).json({ message: "Semua field wajib diisi" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password minimal 6 karakter" });
+    }
+
+    const cleanToken = String(token).trim();
+
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(cleanToken)
+      .digest("hex");
+
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User tidak ditemukan" });
+    }
+
+    if (user.resetPasswordToken !== hashedToken) {
+      return res.status(400).json({ message: "Kode tidak valid" });
+    }
+
+    if (user.resetPasswordExpire < Date.now()) {
+      return res.status(400).json({ message: "Kode expired" });
+    }
+
+    user.password = await bcrypt.hash(password, 10);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
 
     await user.save();
 
     res.json({ message: "Password berhasil direset" });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    console.error("RESET ERROR:", err);
+    res.status(500).json({ message: err.message });
   }
 };

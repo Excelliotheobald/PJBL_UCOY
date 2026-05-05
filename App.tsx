@@ -17,7 +17,7 @@ import BuatSoalDetail from './UCOY/Screens/BuatSoalDetail';
 import EditProfileGuru from './UCOY/Screens/EditProfileGuru';
 import DetailUjian from './UCOY/Screens/DetailUjian';
 
-
+// ================= TYPES =================
 export type RootStackParamList = {
   Splash: undefined;
   Onboarding: undefined;
@@ -27,29 +27,46 @@ export type RootStackParamList = {
   Profileguru: undefined;
   Profilesiswa: undefined;
   formbuatkelas: undefined;
+
+  // 🔥 WAJIB untuk deep link
+  ResetPassword: { token: string };
+
   DetailKelasGuru: {
     kelas: any;
     ujianBaru?: any;
   };
 
   BuatSoalDetail: {
-     jumlahSoal: number,
-  kelas: any
+    jumlahSoal: number;
+    kelas: any;
   };
-  KelasSiswa : undefined;
- Formbuatsoal: { kelas: any };
- EditProfileGuru: undefined
- DetailUjian: {
-  ujian: any;
-  kelas: any;
-};
+
+  KelasSiswa: undefined;
+  Formbuatsoal: { kelas: any };
+  EditProfileGuru: undefined;
+
+  DetailUjian: {
+    ujian: any;
+    kelas: any;
+  };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+// ================= DEEP LINK CONFIG =================
+const linking = {
+  prefixes: ['ucoyapp://'], // 
+  config: {
+    screens: {
+      ResetPassword: 'reset-password/:token',
+    },
+  },
+};
+
+// ================= APP =================
 export default function App() {
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator
         initialRouteName="Splash"
         screenOptions={{ headerShown: false }}
@@ -66,9 +83,10 @@ export default function App() {
         <Stack.Screen name="DetailKelasGuru" component={DetailKelasGuru} />
         <Stack.Screen name="KelasSiswa" component={KelasSiswa} />
         <Stack.Screen name="Formbuatsoal" component={Formbuatsoal} />
-       <Stack.Screen name="BuatSoalDetail" component={BuatSoalDetail} />
+        <Stack.Screen name="BuatSoalDetail" component={BuatSoalDetail} />
         <Stack.Screen name="EditProfileGuru" component={EditProfileGuru} />
         <Stack.Screen name="DetailUjian" component={DetailUjian} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

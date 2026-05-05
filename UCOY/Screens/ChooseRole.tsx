@@ -396,22 +396,93 @@ function LoginView({ onClose, onSwitch, onForgot, navigation }: any) {
 // ================= FORGOT VIEW =================
 
 function ForgotPasswordView({ onClose, onSwitch }: any) {
-  const [email, setEmail] = useState("");
+  const [step, setStep] = useState(1);
 
+  const [email, setEmail] = useState("");
+  const [token, setToken] = useState("");
+  const [password, setPassword] = useState("");
+
+  // ================= STEP 1: KIRIM EMAIL =================
   const handleSend = async () => {
-    if (!email) return Alert.alert("Oops", "Email harus diisi.");
+  if (!email) return Alert.alert("Oops", "Email harus diisi.");
+
+  try {
+    const res = await fetch("http://10.0.2.2:5000/api/users/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await res.json();
+
+    console.log("SEND RESPONSE:", data);
+
+    if (!res.ok) {
+      Alert.alert("Gagal", data.message || "Gagal kirim kode");
+      return;
+    }
+
+    Alert.alert("Berhasil", "Kode dikirim ke email kamu");
+    setStep(2);
+
+  } catch (err) {
+    console.log(err);
+    Alert.alert("Error", "Gagal kirim email");
+  }
+};
+
+  // ================= STEP 2: VERIFIKASI KODE =================
+ const handleVerify = async () => {
+  if (!token) return Alert.alert("Oops", "Kode harus diisi.");
+
+  try {
+    const res = await fetch("http://10.0.2.2:5000/api/users/verify-reset-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, token }),
+    });
+
+    const data = await res.json();
+
+    console.log("VERIFY RESPONSE:", data);
+
+    if (!res.ok) {
+      Alert.alert("Gagal", data.message || "Token tidak valid");
+      return;
+    }
+
+    Alert.alert("Sukses", "Kode valid");
+    setStep(3);
+
+  } catch (err) {
+    console.log(err);
+    Alert.alert("Error", "Server error");
+  }
+};
+
+  // ================= STEP 3: RESET PASSWORD =================
+  const handleReset = async () => {
+    if (!password) return Alert.alert("Oops", "Password harus diisi.");
 
     try {
-      const response = await fetch("http://10.0.2.2:5000/api/users/forgot-password", {
+      const res = await fetch("http://10.0.2.2:5000/api/users/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, token, password }),
       });
 
-      const data = await response.json();
-      Alert.alert("Info", data.message || "Link reset telah dikirim.");
-    } catch (err) {
-      Alert.alert("Error", "Tidak dapat terhubung ke server.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        Alert.alert("Gagal", data.message);
+        return;
+      }
+
+      Alert.alert("Berhasil", "Password berhasil direset");
+      onSwitch(); // balik ke login
+
+    } catch {
+      Alert.alert("Error", "Server error");
     }
   };
 
@@ -420,22 +491,70 @@ function ForgotPasswordView({ onClose, onSwitch }: any) {
       <View style={styles.handle} />
       <Text style={styles.modalTitle}>Reset Password</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Masukkan email kamu"
-         placeholderTextColor="#999"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
+      {/* ================= STEP 1 ================= */}
+      {step === 1 && (
+        <>
+          <TextInput
+            style={styles.input}
+            placeholder="Masukkan email"
+            placeholderTextColor="#999"
+            value={email}
+            onChangeText={setEmail}
+          />
 
-      <TouchableOpacity
-        style={[styles.modalButton, { backgroundColor: email ? "#3A4FE7" : "#AEB9FF" }]}
-        disabled={!email}
-        onPress={handleSend}
-      >
-        <Text style={styles.modalButtonText}>Kirim Reset Link</Text>
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.modalButton, { backgroundColor: email ? "#3A4FE7" : "#AEB9FF" }]}
+            disabled={!email}
+            onPress={handleSend}
+          >
+            <Text style={styles.modalButtonText}>Kirim Kode</Text>
+          </TouchableOpacity>
+        </>
+      )}
+
+      {/* ================= STEP 2 ================= */}
+      {step === 2 && (
+        <>
+          <TextInput
+            style={styles.input}
+            placeholder="Masukkan kode 6 digit"
+            placeholderTextColor="#999"
+            value={token}
+            onChangeText={setToken}
+            keyboardType="numeric"
+          />
+
+          <TouchableOpacity
+            style={[styles.modalButton, { backgroundColor: token ? "#3A4FE7" : "#AEB9FF" }]}
+            disabled={!token}
+            onPress={handleVerify}
+          >
+            <Text style={styles.modalButtonText}>Verifikasi Kode</Text>
+          </TouchableOpacity>
+        </>
+      )}
+
+      {/* ================= STEP 3 ================= */}
+      {step === 3 && (
+        <>
+          <TextInput
+            style={styles.input}
+            placeholder="Password baru"
+            placeholderTextColor="#999"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <TouchableOpacity
+            style={[styles.modalButton, { backgroundColor: password ? "#3A4FE7" : "#AEB9FF" }]}
+            disabled={!password}
+            onPress={handleReset}
+          >
+            <Text style={styles.modalButtonText}>Reset Password</Text>
+          </TouchableOpacity>
+        </>
+      )}
 
       <TouchableOpacity onPress={onSwitch}>
         <Text style={styles.registerText}>Kembali ke Login</Text>
@@ -447,8 +566,6 @@ function ForgotPasswordView({ onClose, onSwitch }: any) {
     </View>
   );
 }
-
-
 
 // ================= STYLES =================
 

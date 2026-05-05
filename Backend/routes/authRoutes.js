@@ -1,26 +1,25 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
 import {
   register,
   login,
   forgotPassword,
+  verifyResetToken,
   resetPassword,
 } from "../controllers/authController.js";
 
 const router = express.Router();
 
-/* ======================
-        DEBUG ROUTE
-====================== */
-router.get("/cek", (req, res) => {
-  res.send("ROUTE HIDUP");
+const forgotLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: "Terlalu sering request reset password",
 });
 
-/* ======================
-        ROUTES
-====================== */
 router.post("/register", register);
 router.post("/login", login);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password/:token", resetPassword);
+router.post("/forgot-password", forgotLimiter, forgotPassword);
+router.post("/verify-reset-token", verifyResetToken);
+router.post("/reset-password", resetPassword);
 
 export default router;
