@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,17 +13,41 @@ import {
   Bell,
   User,
 } from "lucide-react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Footerguru from "../Components/Footerguru";
 
-
-
 export default function Profileguru({ navigation }: any) {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+  const loadUser = async () => {
+    const data = await AsyncStorage.getItem("user");
+    if (data) {
+      const parsed = JSON.parse(data);
+      setUser(parsed);
+    }
+  };
+
+  const unsubscribe = navigation.addListener("focus", loadUser);
+  return unsubscribe;
+}, [navigation]);
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("user");
+    navigation.replace("ChooseRole");
+  };
+
+  if (!user) {
+    return (
+      <Text style={{ textAlign: "center", marginTop: 50 }}>
+        Loading...
+      </Text>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="#2417B8"
-      />
+      <StatusBar barStyle="light-content" backgroundColor="#2417B8" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -41,27 +65,26 @@ export default function Profileguru({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
-      {/* Background Biru */}
       <View style={styles.topSection} />
 
-      {/* Profil */}
+      {/* Profile */}
       <View style={styles.profileSection}>
         <Image
-          source={{ uri: "https://i.pravatar.cc/300?img=12" }}
-          style={styles.avatar}
+        source={
+          user.avatar
+            ? { uri: user.avatar }
+            : require("./profile.png") // avatar default
+        }
+        style={styles.avatar}
         />
 
         <View style={styles.profileInfo}>
-          <Text style={styles.name}>Khoirul Saputra</Text>
-          <Text style={styles.email}>
-            khoirul@gmail.com
-          </Text>
+          <Text style={styles.name}>{user.nama}</Text>
+          <Text style={styles.email}>{user.email}</Text>
         </View>
 
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>
-            Data Kosong
-          </Text>
+          <Text style={styles.badgeText}>{user.role}</Text>
         </View>
       </View>
 
@@ -69,46 +92,36 @@ export default function Profileguru({ navigation }: any) {
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <User size={21} color="#000" />
-          <Text style={styles.cardTitle}>
-            Data Diri
-          </Text>
+          <Text style={styles.cardTitle}>Data Diri</Text>
         </View>
 
         {[
-          ["Peran", "Guru"],
+          ["Peran", user.role],
           ["NIP", "-"],
-          ["Email", "khoirul@gmail.com"],
-          ["Nama", "Khoirul Saputra"],
+          ["Email", user.email],
+          ["Nama", user.nama],
         ].map(([label, value], index) => (
           <View key={index}>
             <View style={styles.row}>
-              <Text style={styles.rowLabel}>
-                {label}
-              </Text>
-              <Text style={styles.rowValue}>
-                {value}
-              </Text>
+              <Text style={styles.rowLabel}>{label}</Text>
+              <Text style={styles.rowValue}>{value}</Text>
             </View>
 
-            {index !== 3 && (
-              <View style={styles.divider} />
-            )}
+            {index !== 3 && <View style={styles.divider} />}
           </View>
         ))}
       </View>
 
-      {/* Tombol Edit */}
-     <TouchableOpacity
-  style={styles.editButton}
-  onPress={() => navigation.navigate("EditProfileGuru")}
->
-  <Text style={styles.editButtonText}>
-    Edit Profil
-  </Text>
-</TouchableOpacity>
+      {/* Edit */}
+      <TouchableOpacity
+        style={styles.editButton}
+        onPress={() => navigation.navigate("EditProfileGuru")}
+      >
+        <Text style={styles.editButtonText}>Edit Profil</Text>
+      </TouchableOpacity>
 
       {/* Logout */}
-      <TouchableOpacity style={styles.logoutButton}>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Keluar</Text>
       </TouchableOpacity>
 

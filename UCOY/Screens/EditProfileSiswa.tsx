@@ -12,81 +12,65 @@ import {
   Animated,
   PanResponder,
   Dimensions,
+  Alert,
 } from "react-native";
-import {
-  ChevronLeft,
-  Bell,
-  User,
-  Mail,
-  Calendar,
-} from "lucide-react-native";
+import { ChevronLeft, Bell, User, Mail } from "lucide-react-native";
 import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function EditProfileGuru({ navigation }: any) {
-  const [user, setUser] = useState<any>(null);
+export default function EditProfileSiswa({ navigation }) {
+  const [user, setUser] = useState(null);
 
   const [nama, setNama] = useState("");
   const [email, setEmail] = useState("");
-  const [gender, setGender] = useState("Laki-Laki");
-  const [avatar, setAvatar] = useState("");
+  const [nis, setNis] = useState("");
 
-  // 🔥 tambahan field (biar sesuai UI kamu)
-  const [mapel, setMapel] = useState("");
-  const [nip, setNip] = useState("");
-  const [tanggal, setTanggal] = useState("");
-  const [phone, setPhone] = useState("");
+  const [gender, setGender] = useState("Laki-Laki");
+  const [kelas, setKelas] = useState("11 SMK");
+  const [jurusan, setJurusan] = useState("PPLG");
 
   const screenHeight = Dimensions.get("window").height;
   const INITIAL_POSITION = 250;
 
-  const [translateY] = useState(
-    new Animated.Value(INITIAL_POSITION)
-  );
+  const [translateY] = useState(new Animated.Value(INITIAL_POSITION));
 
-  // 🔥 LOAD DATA
+  // LOAD DATA
   useEffect(() => {
     const getUser = async () => {
       const data = await AsyncStorage.getItem("user");
       if (data) {
         const parsed = JSON.parse(data);
         setUser(parsed);
-
-        setNama(parsed.nama || "");
-        setEmail(parsed.email || "");
+        setNama(parsed.nama);
+        setEmail(parsed.email);
+        setNis(parsed.nis || "");
         setGender(parsed.gender || "Laki-Laki");
-        setAvatar(parsed.avatar || "");
-
-        setMapel(parsed.mapel || "");
-        setNip(parsed.nip || "");
-        setTanggal(parsed.tanggal || "");
-        setPhone(parsed.phone || "");
+        setKelas(parsed.kelas || "11 SMK");
+        setJurusan(parsed.jurusan || "PPLG");
       }
     };
 
     getUser();
   }, []);
 
-  // 🔥 SAVE DATA
+  // SAVE
   const handleSave = async () => {
     const updatedUser = {
       ...user,
       nama,
       email,
+      nis,
       gender,
-      avatar,
-      mapel,
-      nip,
-      tanggal,
-      phone,
+      kelas,
+      jurusan,
     };
 
     await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
-
+    Alert.alert("Berhasil", "Profile berhasil diupdate!");
     navigation.goBack();
   };
 
-  // 🔥 PAN
+  // DRAG
   const panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: () => true,
     onPanResponderMove: (_, gesture) => {
@@ -113,19 +97,8 @@ export default function EditProfileGuru({ navigation }: any) {
   });
 
   if (!user) {
-    return (
-      <Text style={{ marginTop: 50, textAlign: "center" }}>
-        Loading...
-      </Text>
-    );
+    return <Text style={{ marginTop: 50, textAlign: "center" }}>Loading...</Text>;
   }
-
-  const avatars = [
-    "https://i.pravatar.cc/150?img=11",
-    "https://i.pravatar.cc/150?img=12",
-    "https://i.pravatar.cc/150?img=13",
-    "https://i.pravatar.cc/150?img=14",
-  ];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -144,20 +117,16 @@ export default function EditProfileGuru({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
-      {/* FOTO */}
+      {/* PROFILE */}
       <View style={styles.topSection}>
         <Image
-          source={
-            avatar
-              ? { uri: avatar }
-              : require("./siswa.png")
-          }
+          source={{ uri: `https://i.pravatar.cc/300?u=${email}` }}
           style={styles.profileImage}
         />
         <Text style={styles.profileName}>{nama}</Text>
       </View>
 
-      {/* BOTTOM SHEET */}
+      {/* FORM */}
       <Animated.View
         style={[
           styles.formContainer,
@@ -193,14 +162,14 @@ export default function EditProfileGuru({ navigation }: any) {
             />
           </View>
 
-          {/* GENDER + MAPEL */}
+          {/* GENDER + NIS */}
           <View style={styles.row}>
             <View style={styles.half}>
               <Text style={styles.label}>Gender</Text>
               <View style={styles.pickerContainer}>
                 <Picker
                   selectedValue={gender}
-                  onValueChange={setGender}
+                  onValueChange={(itemValue) => setGender(itemValue)}
                 >
                   <Picker.Item label="Laki-Laki" value="Laki-Laki" />
                   <Picker.Item label="Perempuan" value="Perempuan" />
@@ -209,72 +178,50 @@ export default function EditProfileGuru({ navigation }: any) {
             </View>
 
             <View style={styles.half}>
-              <Text style={styles.label}>Mapel</Text>
-              <TextInput
-                style={styles.textInput}
-                value={mapel}
-                onChangeText={setMapel}
-              />
+              <Text style={styles.label}>NIS</Text>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.input}
+                  value={nis}
+                  onChangeText={setNis}
+                />
+              </View>
             </View>
           </View>
 
-          {/* NIP */}
-          <Text style={styles.label}>NIP</Text>
-          <TextInput
-            style={styles.textInput}
-            value={nip}
-            onChangeText={setNip}
-          />
+          {/* KELAS + JURUSAN */}
+          <View style={styles.row}>
+            <View style={styles.half}>
+              <Text style={styles.label}>Kelas</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={kelas}
+                  onValueChange={(itemValue) => setKelas(itemValue)}
+                >
+                  <Picker.Item label="10 SMK" value="10 SMK" />
+                  <Picker.Item label="11 SMK" value="11 SMK" />
+                  <Picker.Item label="12 SMK" value="12 SMK" />
+                </Picker>
+              </View>
+            </View>
 
-          {/* TANGGAL */}
-          <Text style={styles.label}>Tanggal Lahir</Text>
-          <View style={styles.inputWrapper}>
-            <Calendar size={20} />
-            <TextInput
-              style={styles.input}
-              value={tanggal}
-              onChangeText={setTanggal}
-            />
-          </View>
-
-          {/* PHONE */}
-          <Text style={styles.label}>Nomor Telepon</Text>
-          <View style={styles.phoneRow}>
-            <TextInput style={styles.countryCode} value="+62" />
-            <TextInput
-              style={styles.phoneInput}
-              value={phone}
-              onChangeText={setPhone}
-            />
-          </View>
-
-          {/* AVATAR */}
-          <Text style={styles.avatarTitle}>Avatar</Text>
-          <View style={styles.avatarRow}>
-            {avatars.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => setAvatar(item)}
-              >
-                <Image
-                  source={{ uri: item }}
-                  style={[
-                    styles.avatarOption,
-                    avatar === item && {
-                      borderWidth: 2,
-                      borderColor: "#1D1A9B",
-                    },
-                  ]}
-                />
-              </TouchableOpacity>
-            ))}
+            <View style={styles.half}>
+              <Text style={styles.label}>Jurusan</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={jurusan}
+                  onValueChange={(itemValue) => setJurusan(itemValue)}
+                >
+                  <Picker.Item label="PPLG" value="PPLG" />
+                  <Picker.Item label="TJKT" value="TJKT" />
+                  <Picker.Item label="DKV" value="DKV" />
+                </Picker>
+              </View>
+            </View>
           </View>
 
           {/* SAVE */}
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSave}
-          >
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.saveText}>Simpan</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -289,6 +236,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     marginTop: 60,
   },
@@ -329,6 +277,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 30,
     paddingHorizontal: 20,
     paddingTop: 20,
+    elevation: 10,
   },
 
   dragIndicator: {
@@ -362,21 +311,14 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 
-  textInput: {
-    backgroundColor: "#FFF",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#DDD",
-    paddingHorizontal: 15,
-    height: 50,
-  },
-
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
 
-  half: { width: "48%" },
+  half: {
+    width: "48%",
+  },
 
   pickerContainer: {
     backgroundColor: "#FFF",
@@ -387,49 +329,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  phoneRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-
-  countryCode: {
-    width: "30%",
-    backgroundColor: "#FFF",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#DDD",
-    textAlign: "center",
-  },
-
-  phoneInput: {
-    width: "65%",
-    backgroundColor: "#FFF",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#DDD",
-    paddingHorizontal: 15,
-  },
-
-  avatarTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginTop: 20,
-  },
-
-  avatarRow: {
-    flexDirection: "row",
-    marginBottom: 30,
-  },
-
-  avatarOption: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 12,
-  },
-
   saveButton: {
     alignSelf: "flex-end",
+    marginTop: 20,
     marginBottom: 40,
   },
 

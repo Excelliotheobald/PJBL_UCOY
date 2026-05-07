@@ -270,11 +270,14 @@ function RegisterView({ onClose, onSwitch, role, navigation }: any) {
     }
 
     // 🔥 SIMPAN USER LENGKAP (INI YANG PENTING)
-    await AsyncStorage.setItem("user", JSON.stringify({
-      id: data.user?._id || Date.now().toString(),
-      nama: nama,
-      role: role,
-    }));
+      const userData = {
+    ...data.user,
+    nama: data.user?.nama || nama,
+    email: data.user?.email || email,
+    role: role,
+};
+
+    await AsyncStorage.setItem("user", JSON.stringify(userData));
 
     Alert.alert('Sukses', 'Registrasi berhasil!');
 
@@ -341,11 +344,13 @@ function LoginView({ onClose, onSwitch, onForgot, navigation }: any) {
     }
 
     // 🔥 SIMPAN USER LENGKAP (INI KUNCI)
-    await AsyncStorage.setItem("user", JSON.stringify({
-      id: data.user._id,
-      nama: data.user.nama,
-      role: data.user.role,
-    }));
+      const userData = {
+    ...data.user,
+    nama: data.user?.nama || "User",
+    email: data.user?.email || email,
+  };
+
+await AsyncStorage.setItem("user", JSON.stringify(userData));
 
     Alert.alert('Berhasil', 'Login sukses!');
 
@@ -455,7 +460,7 @@ function ForgotPasswordView({ onClose, onSwitch }: any) {
     setStep(3);
 
   } catch (err) {
-    console.log(err);
+    console.log("RESET ERROR:", err);
     Alert.alert("Error", "Server error");
   }
 };

@@ -9,7 +9,7 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
-import Svg, { Rect,} from 'react-native-svg';
+import Svg, { Rect } from 'react-native-svg';
 import Footerguru from '../Components/Footerguru';
 import { Dimensions } from 'react-native';
 import {
@@ -17,7 +17,6 @@ import {
   BookOpen,
   Settings,
   Trash2,
-  
 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
@@ -36,33 +35,32 @@ export default function Guru({ navigation }: any) {
   const [nama, setNama] = useState('');
   const [showDropdown, setShowDropdown] = useState(false); // dropdaun
   const [kelas, setKelas] = useState<KelasType[]>([]);
-  
-  
 
   useEffect(() => {
     const loadData = async () => {
-     const savedUser = await AsyncStorage.getItem("user");
+      const savedUser = await AsyncStorage.getItem("user");
 
-if (savedUser) {
-  const parsed = JSON.parse(savedUser);
-  setNama(parsed.nama);
-}
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        setNama(parsed.nama);
+      }
 
       // 🟩 Ambil data kelas
       const savedClass = await AsyncStorage.getItem('kelas');
+
       if (savedClass) {
-  const parsed = JSON.parse(savedClass);
+        const parsed = JSON.parse(savedClass);
 
-  // 🔥 filter data biar cuma yang valid
-  const cleanData = parsed
-  .filter((item: any) => item.mapel && item.namaKelas)
-  .map((item: any) => ({
-    ...item,
-    siswa: Array.isArray(item.siswa) ? item.siswa : [], // 🔥 penting
-  }));
+        // 🔥 filter data biar cuma yang valid
+        const cleanData = parsed
+          .filter((item: any) => item.mapel && item.namaKelas)
+          .map((item: any) => ({
+            ...item,
+            siswa: Array.isArray(item.siswa) ? item.siswa : [],
+          }));
 
-  setKelas(cleanData);
-}else {
+        setKelas(cleanData);
+      } else {
         setKelas([]);
       }
     };
@@ -75,11 +73,11 @@ if (savedUser) {
     navigation.navigate('formbuatkelas' as never);
   };
 
- const handleLogout = async () => {
-  await AsyncStorage.removeItem("user");
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("user");
+    navigation.replace("ChooseRole" as never);
+  };
 
-  navigation.replace("ChooseRole" as never);
-};
   const handleDeleteClass = async (id: string) => {
     Alert.alert('Hapus Kelas', 'Yakin ingin menghapus kelas ini?', [
       { text: 'Batal', style: 'cancel' },
@@ -110,6 +108,7 @@ if (savedUser) {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         <View style={{ flex: 1, backgroundColor: '#EEEEF3' }}>
+
           {/* 🔵 DROPDOWN / MENU */}
           {showDropdown && (
             <TouchableOpacity
@@ -166,7 +165,6 @@ if (savedUser) {
           </View>
 
           {/* 🔵 BOX STATUS */}
-
           <View style={styles.statsContainer}>
             <View style={styles.statBox}>
               <Text style={styles.statNumber}>0</Text>
@@ -183,10 +181,10 @@ if (savedUser) {
               <Text style={styles.statLabel}>Belum Mulai</Text>
             </View>
           </View>
+
           {/* SECTION JIKA BELUM ADA KELAS */}
           {kelas.length === 0 && (
             <>
-              {/* 🔵 BOX BUAT SOAL */}
               <View style={styles.boxbuatsoal}>
                 <View style={styles.icon}>
                   <Users size={32} color="#1D1A9B" strokeWidth={2.5} />
@@ -209,9 +207,7 @@ if (savedUser) {
 
               <Text style={styles.anjay}>Langkah Memulai ❗</Text>
 
-              {/* 🔵 STEP - TUTORIAL */}
               <View style={styles.wrapper1}>
-                {/* STEP 1 */}
                 <View style={styles.card}>
                   <View style={styles.circle}>
                     <Text style={styles.circleText}>1</Text>
@@ -229,7 +225,6 @@ if (savedUser) {
                   </View>
                 </View>
 
-                {/* STEP 2 */}
                 <View style={[styles.card, styles.activeCard]}>
                   <View style={styles.circle}>
                     <Text style={styles.circleText}>2</Text>
@@ -243,7 +238,6 @@ if (savedUser) {
                   </View>
                 </View>
 
-                {/* STEP 3 */}
                 <View style={styles.card}>
                   <View style={styles.circle}>
                     <Text style={styles.circleText}>3</Text>
@@ -256,7 +250,6 @@ if (savedUser) {
                   </View>
                 </View>
 
-                {/* STEP 4 */}
                 <View style={styles.card}>
                   <View style={styles.circle}>
                     <Text style={styles.circleText}>4</Text>
@@ -264,13 +257,11 @@ if (savedUser) {
                   <View style={styles.textBox}>
                     <Text style={styles.title}>Jadwalkan Ujian</Text>
                     <Text style={styles.desc}>
-                      Atur jadwal dan durasi ujian, lalu publikasikan untuk
-                      siswa.
+                      Atur jadwal dan durasi ujian, lalu publikasikan untuk siswa.
                     </Text>
                   </View>
                 </View>
 
-                {/* TIPS */}
                 <View style={styles.tipsBox}>
                   <Text style={styles.tipsTitle}>
                     Tips Membuat Ujian yang Baik 💡
@@ -290,7 +281,6 @@ if (savedUser) {
                   </Text>
                 </View>
 
-                {/* HELP */}
                 <View style={styles.helpBox}>
                   <BookOpen size={42} color="#2A34D9" />
                   <Text style={styles.helpTitle}>Butuh Bantuan?</Text>
@@ -313,24 +303,29 @@ if (savedUser) {
 
               {kelas.map((item, index) => (
                 <View key={index} style={styles.classCard}>
-                  {/* Ikon 123 */}
-                   <Image
-                      source={require("./123.png")}
-                      style={styles.numberImage}
-                    />
+                  <Image
+                    source={require("./123.png")}
+                    style={styles.numberImage}
+                  />
 
                   <View style={{ flex: 1, marginLeft: 15 }}>
-                  <Text style={styles.mapelText}>
-                   {item.mapel} Kelas {item.namaKelas}
+                    <Text style={styles.mapelText}>
+                      {item.mapel} Kelas {item.namaKelas}
                     </Text>
-                  <Text style={styles.subText}>
-                    {Array.isArray(item.siswa) ? item.siswa.length : 0} Siswa
-                  </Text>
+                    <Text style={styles.subText}>
+                      {Array.isArray(item.siswa)
+                        ? item.siswa.length
+                        : 0}{' '}
+                      Siswa
+                    </Text>
                   </View>
 
                   <TouchableOpacity
                     style={styles.kelolaBtn}
-                    onPress={() => navigation.navigate("DetailKelasGuru", { kelas: item })} >
+                    onPress={() =>
+                      navigation.navigate("DetailKelasGuru", { kelas: item })
+                    }
+                  >
                     <Text style={styles.kelolaText}>Kelola</Text>
                   </TouchableOpacity>
                 </View>

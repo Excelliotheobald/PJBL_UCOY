@@ -15,6 +15,7 @@ import KelasSiswa from './UCOY/Screens/KelasSiswa';
 import Formbuatsoal from './UCOY/Screens/Formbuatsoal';
 import BuatSoalDetail from './UCOY/Screens/BuatSoalDetail';
 import EditProfileGuru from './UCOY/Screens/EditProfileGuru';
+import EditProfileSiswa from './UCOY/Screens/EditProfileSiswa';
 import DetailUjian from './UCOY/Screens/DetailUjian';
 
 // ================= TYPES =================
@@ -44,6 +45,7 @@ export type RootStackParamList = {
   KelasSiswa: undefined;
   Formbuatsoal: { kelas: any };
   EditProfileGuru: undefined;
+  EditProfileSiswa: undefined;
 
   DetailUjian: {
     ujian: any;
@@ -85,6 +87,7 @@ export default function App() {
         <Stack.Screen name="Formbuatsoal" component={Formbuatsoal} />
         <Stack.Screen name="BuatSoalDetail" component={BuatSoalDetail} />
         <Stack.Screen name="EditProfileGuru" component={EditProfileGuru} />
+        <Stack.Screen name="EditProfileSiswa" component={EditProfileSiswa} />
         <Stack.Screen name="DetailUjian" component={DetailUjian} />
 
       </Stack.Navigator>
