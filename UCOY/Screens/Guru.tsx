@@ -357,12 +357,11 @@ numberImage: {
 
 
   headerWrapper: {
-    height: HEADER_HEIGHT,
-    borderBottomLeftRadius: 40,
-    borderBottomRightRadius: 40,
-    overflow: 'hidden',
-    left: 0.5,
-  },
+  height: HEADER_HEIGHT,
+  borderBottomLeftRadius: 40,
+  borderBottomRightRadius: 40,
+  overflow: 'hidden',
+},
 
   classCard: {
   flexDirection: 'row',

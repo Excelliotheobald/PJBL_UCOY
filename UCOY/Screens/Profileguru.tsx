@@ -83,35 +83,43 @@ export default function Profileguru({ navigation }: any) {
           <Text style={styles.email}>{user.email}</Text>
         </View>
 
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{user.role}</Text>
+        <View
+          style={[
+            styles.badge,
+            { backgroundColor: user.mapel ? "#2417B8" : "#D7D7D7" }
+          ]}
+        >
+          <Text style={styles.badgeText}>
+            {user.mapel || "-"}
+          </Text>
         </View>
       </View>
 
       {/* Card */}
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <User size={21} color="#000" />
-          <Text style={styles.cardTitle}>Data Diri</Text>
+   <View style={styles.card}>
+    <View style={styles.cardHeader}>
+      <User size={21} color="#000" />
+      <Text style={styles.cardTitle}>Data Diri</Text>
+    </View>
+
+    {[
+      ["Peran", user.role],
+      ["NIP", user.nip || "-"],
+      ["Email", user.email],
+      ["Nama", user.nama],
+      ["No HP", user.phone || "-"],
+      ["Tanggal Lahir", user.tanggal || "-"],
+    ].map(([label, value], index, arr) => (
+      <View key={index}>
+        <View style={styles.row}>
+          <Text style={styles.rowLabel}>{label}</Text>
+          <Text style={styles.rowValue}>{value}</Text>
         </View>
 
-        {[
-          ["Peran", user.role],
-          ["NIP", "-"],
-          ["Email", user.email],
-          ["Nama", user.nama],
-        ].map(([label, value], index) => (
-          <View key={index}>
-            <View style={styles.row}>
-              <Text style={styles.rowLabel}>{label}</Text>
-              <Text style={styles.rowValue}>{value}</Text>
-            </View>
-
-            {index !== 3 && <View style={styles.divider} />}
-          </View>
-        ))}
+        {index !== arr.length - 1 && <View style={styles.divider} />}
       </View>
-
+    ))}
+  </View>
       {/* Edit */}
       <TouchableOpacity
         style={styles.editButton}
@@ -121,9 +129,9 @@ export default function Profileguru({ navigation }: any) {
       </TouchableOpacity>
 
       {/* Logout */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Keluar</Text>
-      </TouchableOpacity>
+      <TouchableOpacity onPress={handleLogout}>
+          <Text style={styles.logout}>Keluar</Text>
+        </TouchableOpacity>
 
       <Footerguru activeTab="profile" />
     </SafeAreaView>
@@ -201,10 +209,10 @@ const styles = StyleSheet.create({
     color: "#666",
   },
 
-  badge: {
+    badge: {
     marginTop: 90,
-    backgroundColor: "#D7D7D7",
-    paddingHorizontal: 50,
+    backgroundColor: "#2417B8", // 🔥 warna utama
+    paddingHorizontal: 30,
     paddingVertical: 8,
     borderRadius: 12,
   },
@@ -297,5 +305,11 @@ const styles = StyleSheet.create({
     color: "#FF0000",
     fontSize: 18,
     fontWeight: "500",
+  },
+
+  logout: {
+    textAlign: "center",
+    color: "red",
+    marginTop: 70,
   },
 });

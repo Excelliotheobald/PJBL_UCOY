@@ -22,6 +22,8 @@ import {
 } from "lucide-react-native";
 import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Platform } from "react-native";
 
 export default function EditProfileGuru({ navigation }: any) {
   const [user, setUser] = useState<any>(null);
@@ -35,7 +37,10 @@ export default function EditProfileGuru({ navigation }: any) {
   const [mapel, setMapel] = useState("");
   const [nip, setNip] = useState("");
   const [tanggal, setTanggal] = useState("");
+  const [showPicker, setShowPicker] = useState(false);
+  const [date, setDate] = useState(new Date());
   const [phone, setPhone] = useState("");
+  const [countryCode, setCountryCode] = useState("+62");
 
   const screenHeight = Dimensions.get("window").height;
   const INITIAL_POSITION = 250;
@@ -60,7 +65,13 @@ export default function EditProfileGuru({ navigation }: any) {
         setMapel(parsed.mapel || "");
         setNip(parsed.nip || "");
         setTanggal(parsed.tanggal || "");
-        setPhone(parsed.phone || "");
+        if (parsed.phone) {
+          const code = parsed.phone.match(/^\+\d+/)?.[0] || "+62";
+          const number = parsed.phone.replace(code, "");
+
+          setCountryCode(code);
+          setPhone(number);
+        }
       }
     };
 
@@ -78,7 +89,7 @@ export default function EditProfileGuru({ navigation }: any) {
       mapel,
       nip,
       tanggal,
-      phone,
+      phone: `${countryCode}${phone}`,  
     };
 
     await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
@@ -112,6 +123,20 @@ export default function EditProfileGuru({ navigation }: any) {
     },
   });
 
+  const onChangeDate = (event: any, selectedDate: any) => {
+  setShowPicker(false);
+
+  if (selectedDate) {
+    setDate(selectedDate);
+
+    const day = String(selectedDate.getDate()).padStart(2, "0");
+    const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+    const year = selectedDate.getFullYear();
+
+    setTanggal(`${day}/${month}/${year}`);
+  }
+};
+
   if (!user) {
     return (
       <Text style={{ marginTop: 50, textAlign: "center" }}>
@@ -121,10 +146,10 @@ export default function EditProfileGuru({ navigation }: any) {
   }
 
   const avatars = [
-    "https://i.pravatar.cc/150?img=11",
-    "https://i.pravatar.cc/150?img=12",
-    "https://i.pravatar.cc/150?img=13",
-    "https://i.pravatar.cc/150?img=14",
+   "https://api.dicebear.com/7.x/avataaars/png?seed=guru1",
+    "https://api.dicebear.com/7.x/avataaars/png?seed=guru2",
+    "https://api.dicebear.com/7.x/avataaars/png?seed=guru3",
+    "https://api.dicebear.com/7.x/avataaars/png?seed=guru4",
   ];
 
   return (
@@ -150,7 +175,7 @@ export default function EditProfileGuru({ navigation }: any) {
           source={
             avatar
               ? { uri: avatar }
-              : require("./siswa.png")
+              : require("./profile.png")
           }
           style={styles.profileImage}
         />
@@ -189,7 +214,7 @@ export default function EditProfileGuru({ navigation }: any) {
             <TextInput
               style={styles.input}
               value={email}
-              onChangeText={setEmail}
+              editable={false} // 🔒 bikin tidak bisa diubah
             />
           </View>
 
@@ -228,22 +253,47 @@ export default function EditProfileGuru({ navigation }: any) {
 
           {/* TANGGAL */}
           <Text style={styles.label}>Tanggal Lahir</Text>
-          <View style={styles.inputWrapper}>
-            <Calendar size={20} color="#333" />
-            <TextInput
-              style={styles.input}
-              placeholder="22/11/1999"
+
+          <TouchableOpacity onPress={() => setShowPicker(true)}>
+            <View style={styles.inputWrapper}>
+              <Calendar size={20} />
+              <Text style={styles.input}>
+                {tanggal || "Pilih tanggal"}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {showPicker && (
+            <DateTimePicker
+              value={date}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={onChangeDate}
             />
-          </View>
+          )}
 
           {/* PHONE */}
           <Text style={styles.label}>Nomor Telepon</Text>
           <View style={styles.phoneRow}>
-            <TextInput style={styles.countryCode} value="+62" />
+            <View style={styles.codePicker}>
+              <Picker
+                selectedValue={countryCode}
+                onValueChange={(itemValue) => setCountryCode(itemValue)}
+                style={{ height: 50 }}
+              >
+                <Picker.Item label="🇮🇩 +62" value="+62" />
+                <Picker.Item label="🇺🇸 +1" value="+1" />
+                <Picker.Item label="🇬🇧 +44" value="+44" />
+                <Picker.Item label="🇯🇵 +81" value="+81" />
+                <Picker.Item label="🇸🇬 +65" value="+65" />
+              </Picker>
+            </View>
+
             <TextInput
               style={styles.phoneInput}
               value={phone}
               onChangeText={setPhone}
+              keyboardType="phone-pad"
             />
           </View>
 
@@ -398,6 +448,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#DDD",
     textAlign: "center",
+  },
+
+    codePicker: {
+    width: "35%",
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#DDD",
+    justifyContent: "center",
   },
 
   phoneInput: {
