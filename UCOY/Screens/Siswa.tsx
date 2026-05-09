@@ -14,6 +14,7 @@ import {
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Footersiswa from "../Components/Footersiswa";
+import Svg, { Rect } from "react-native-svg";
 
 import {
   Bell,
@@ -22,6 +23,7 @@ import {
 } from "lucide-react-native";
 
 const { width } = Dimensions.get("window");
+const HEADER_HEIGHT = 230;
 
 export default function Siswa({ navigation }: any) {
   const [kodeKelas, setKodeKelas] = useState("");
@@ -152,8 +154,21 @@ export default function Siswa({ navigation }: any) {
 
       {/* ================= HEADER ================= */}
 
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
+      <View style={styles.headerWrapper}>
+        <View style={styles.curve1} />
+        <View style={styles.curve} />
+
+        <Svg height={HEADER_HEIGHT} width={width}>
+          <Rect
+            x="0"
+            y="0"
+            width={width}
+            height={HEADER_HEIGHT}
+            fill="#1D1A9B"
+          />
+        </Svg>
+
+        <View style={styles.headerContent}>
           <View style={styles.profileSection}>
             <View style={styles.profileWrapper}>
               <Image
@@ -162,25 +177,21 @@ export default function Siswa({ navigation }: any) {
                 }}
                 style={styles.profileImage}
               />
-            </View>
+        </View>
 
-            <View>
-              <Text style={styles.namaSiswa}>{nama}</Text>
-
-              <Text style={styles.subGreeting}>
-                Siap untuk Ujian?
-              </Text>
-            </View>
-          </View>
-
-          {/* ICON BELL */}
-
-          <TouchableOpacity style={styles.bellButton}>
-            <Bell size={20} color="#fff" />
-          </TouchableOpacity>
+        <View>
+          <Text style={styles.namaSiswa}>{nama}</Text>
+          <Text style={styles.subGreeting}>
+            Siap untuk Ujian?
+          </Text>
         </View>
       </View>
 
+    <TouchableOpacity style={styles.bellButton}>
+      <Bell size={20} color="#fff" />
+    </TouchableOpacity>
+  </View>
+</View>
       {/* ================= CARD DATE ================= */}
 
       <View style={styles.dateCard}>
@@ -579,14 +590,46 @@ stepLink: {
 
   // ================= HEADER =================
 
-  header: {
-    backgroundColor: "#2B22B6",
-    paddingTop: 56,
-    paddingHorizontal: 16,
-    paddingBottom: 82,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-  },
+  headerWrapper: {
+  height: HEADER_HEIGHT,
+  borderBottomLeftRadius: 40,
+  borderBottomRightRadius: 40,
+  overflow: "hidden",
+},
+  headerContent: {
+  position: "absolute",
+  top: 90,
+  left: 20,
+  right: 20,
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  zIndex: 5,
+},
+
+curve: {
+  position: "absolute",
+  width: width * 1.9,
+  height: width * 1.9,
+  backgroundColor: "#2926AA",
+  borderRadius: (width * 1.9) / 2,
+  top: -width * 1.45,
+  left: -width * 0.2,
+  transform: [{ rotate: "28deg" }],
+  zIndex: 1,
+},
+
+curve1: {
+  position: "absolute",
+  width: width * 1.9,
+  height: width * 1.9,
+  backgroundColor: "#3431C1",
+  borderRadius: (width * 1.9) / 2,
+  top: -width * 1.65,
+  left: -width * 0.1,
+  transform: [{ rotate: "28deg" }],
+  zIndex: 2,
+},
 
   headerTop: {
     flexDirection: "row",
