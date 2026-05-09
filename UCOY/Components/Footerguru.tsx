@@ -13,6 +13,7 @@ import { House, UserRound, Plus } from "lucide-react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../App";
+import ImmersiveMode from "react-native-immersive-mode";
 
 const { width } = Dimensions.get("window");
 
@@ -70,6 +71,8 @@ export default function Footerguru({ activeTab }: Props) {
   // Glow animation for FAB
   const glowAnim = useRef(new Animated.Value(0.9)).current;
   useEffect(() => {
+    ImmersiveMode.fullLayout(true);
+    ImmersiveMode.setBarMode("Full");
     Animated.loop(
       Animated.sequence([
         Animated.timing(glowAnim, {

@@ -256,7 +256,7 @@ function RegisterView({ onClose, onSwitch, role, navigation }: any) {
 
  const handleRegister = async () => {
   try {
-    const response = await fetch('http://100.88.160.19:5000/api/users/register', {
+    const response = await fetch('http://localhost:5000/api/users/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nama, email, password, role }),
@@ -332,7 +332,7 @@ function LoginView({ onClose, onSwitch, onForgot, navigation }: any) {
   try {
     console.log("LOGIN CLICKED");
     
-    const response = await fetch('http://192.168.1.112:5000/api/users/login', {
+    const response = await fetch('http://localhost:5000/api/users/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -415,7 +415,7 @@ function ForgotPasswordView({ onClose, onSwitch }: any) {
   if (!email) return Alert.alert("Oops", "Email harus diisi.");
 
   try {
-    const res = await fetch("http://192.168.1.112:5000/api/users/forgot-password", {
+    const res = await fetch("http://localhost:5000/api/users/forgot-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
@@ -444,7 +444,7 @@ function ForgotPasswordView({ onClose, onSwitch }: any) {
   if (!token) return Alert.alert("Oops", "Kode harus diisi.");
 
   try {
-    const res = await fetch("http://192.168.1.112:5000/api/users/verify-reset-token", {
+    const res = await fetch("http://localhost:5000/api/users/verify-reset-token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, token }),
@@ -473,7 +473,7 @@ function ForgotPasswordView({ onClose, onSwitch }: any) {
     if (!password) return Alert.alert("Oops", "Password harus diisi.");
 
     try {
-      const res = await fetch("http://192.168.1.112:5000/api/users/reset-password", {
+      const res = await fetch("http://localhost:5000/api/users/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, token, password }),

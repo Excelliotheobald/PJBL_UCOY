@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -17,6 +17,8 @@ import BuatSoalDetail from './UCOY/Screens/BuatSoalDetail';
 import EditProfileGuru from './UCOY/Screens/EditProfileGuru';
 import EditProfileSiswa from './UCOY/Screens/EditProfileSiswa';
 import DetailUjian from './UCOY/Screens/DetailUjian';
+import ImmersiveMode from "react-native-immersive-mode";
+
 
 // ================= TYPES =================
 export type RootStackParamList = {
@@ -28,6 +30,9 @@ export type RootStackParamList = {
   Profileguru: undefined;
   Profilesiswa: undefined;
   formbuatkelas: undefined;
+
+  // 🔥 WAJIB untuk deep link
+  ResetPassword: { token: string };
 
   DetailKelasGuru: {
     kelas: any;
@@ -52,11 +57,25 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+// ================= DEEP LINK CONFIG =================
+const linking = {
+  prefixes: ['ucoyapp://'], // 
+  config: {
+    screens: {
+      ResetPassword: 'reset-password/:token',
+    },
+  },
+};
 
 // ================= APP =================
 export default function App() {
+  useEffect(() => {
+    ImmersiveMode.fullLayout(true);
+    ImmersiveMode.setBarMode("Full");
+  }, []);
+  
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator
         initialRouteName="Splash"
         screenOptions={{ headerShown: false }}
