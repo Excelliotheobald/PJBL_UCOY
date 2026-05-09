@@ -20,6 +20,7 @@ import Footersiswa from "../Components/Footersiswa";
 
 export default function Profilesiswa({ navigation }: any) {
   const [user, setUser] = useState<any>(null);
+  
 
   useEffect(() => {
     const loadUser = async () => {
