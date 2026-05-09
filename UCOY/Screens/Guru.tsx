@@ -33,7 +33,8 @@ const HEADER_HEIGHT = 230;
 
 export default function Guru({ navigation }: any) {
   const [nama, setNama] = useState('');
-  const [showDropdown, setShowDropdown] = useState(false); // dropdaun
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const [kelas, setKelas] = useState<KelasType[]>([]);
 
   useEffect(() => {
@@ -43,6 +44,7 @@ export default function Guru({ navigation }: any) {
       if (savedUser) {
         const parsed = JSON.parse(savedUser);
         setNama(parsed.nama);
+         setUser(parsed); //
       }
 
       // 🟩 Ambil data kelas
@@ -150,12 +152,15 @@ export default function Guru({ navigation }: any) {
             </Svg>
 
             <View style={styles.profileContainer}>
-              <Image
-                source={{
-                  uri: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
-                }}
+             <Image
+                source={
+                  user?.avatar
+                    ? { uri: user.avatar }
+                    : require("./profile.png")
+                }
                 style={styles.profileImage}
               />
+
 
               <View style={styles.textContainer}>
                 <Text style={styles.welcomeText}>{nama}</Text>

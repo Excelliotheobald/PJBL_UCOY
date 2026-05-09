@@ -29,9 +29,6 @@ export type RootStackParamList = {
   Profilesiswa: undefined;
   formbuatkelas: undefined;
 
-  // 🔥 WAJIB untuk deep link
-  ResetPassword: { token: string };
-
   DetailKelasGuru: {
     kelas: any;
     ujianBaru?: any;
@@ -55,20 +52,11 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-// ================= DEEP LINK CONFIG =================
-const linking = {
-  prefixes: ['ucoyapp://'], // 
-  config: {
-    screens: {
-      ResetPassword: 'reset-password/:token',
-    },
-  },
-};
 
 // ================= APP =================
 export default function App() {
   return (
-    <NavigationContainer linking={linking}>
+    <NavigationContainer>
       <Stack.Navigator
         initialRouteName="Splash"
         screenOptions={{ headerShown: false }}

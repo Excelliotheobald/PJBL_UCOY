@@ -229,11 +229,10 @@ export default function EditProfileGuru({ navigation }: any) {
           {/* TANGGAL */}
           <Text style={styles.label}>Tanggal Lahir</Text>
           <View style={styles.inputWrapper}>
-            <Calendar size={20} />
+            <Calendar size={20} color="#333" />
             <TextInput
               style={styles.input}
-              value={tanggal}
-              onChangeText={setTanggal}
+              placeholder="22/11/1999"
             />
           </View>
 
