@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,41 +7,35 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
-} from "react-native";
-import {
-  ChevronLeft,
-  Bell,
-  User,
-} from "lucide-react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import Footerguru from "../Components/Footerguru";
+} from 'react-native';
+import { ChevronLeft, Bell, User } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Footerguru from '../Components/Footerguru';
 
 export default function Profileguru({ navigation }: any) {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-  const loadUser = async () => {
-    const data = await AsyncStorage.getItem("user");
-    if (data) {
-      const parsed = JSON.parse(data);
-      setUser(parsed);
-    }
-  };
+    const loadUser = async () => {
+      const data = await AsyncStorage.getItem('user');
+      if (data) {
+        const parsed = JSON.parse(data);
+        setUser(parsed);
+      }
+    };
 
-  const unsubscribe = navigation.addListener("focus", loadUser);
-  return unsubscribe;
-}, [navigation]);
+    const unsubscribe = navigation.addListener('focus', loadUser);
+    return unsubscribe;
+  }, [navigation]);
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("user");
-    navigation.replace("ChooseRole");
+    await AsyncStorage.removeItem('user');
+    navigation.replace('ChooseRole');
   };
 
   if (!user) {
     return (
-      <Text style={{ textAlign: "center", marginTop: 50 }}>
-        Loading...
-      </Text>
+      <Text style={{ textAlign: 'center', marginTop: 50 }}>Loading...</Text>
     );
   }
 
@@ -70,12 +64,10 @@ export default function Profileguru({ navigation }: any) {
       {/* Profile */}
       <View style={styles.profileSection}>
         <Image
-        source={
-          user.avatar
-            ? { uri: user.avatar }
-            : require("./profile.png") // avatar default
-        }
-        style={styles.avatar}
+          source={
+            user.avatar ? { uri: user.avatar } : require('./profile.png') // avatar default
+          }
+          style={styles.avatar}
         />
 
         <View style={styles.profileInfo}>
@@ -86,52 +78,50 @@ export default function Profileguru({ navigation }: any) {
         <View
           style={[
             styles.badge,
-            { backgroundColor: user.mapel ? "#2417B8" : "#D7D7D7" }
+            { backgroundColor: user.mapel ? '#2417B8' : '#D7D7D7' },
           ]}
         >
-          <Text style={styles.badgeText}>
-            {user.mapel || "-"}
-          </Text>
+          <Text style={styles.badgeText}>{user.mapel || '-'}</Text>
         </View>
       </View>
 
       {/* Card */}
-   <View style={styles.card}>
-    <View style={styles.cardHeader}>
-      <User size={21} color="#000" />
-      <Text style={styles.cardTitle}>Data Diri</Text>
-    </View>
-
-    {[
-      ["Peran", user.role],
-      ["NIP", user.nip || "-"],
-      ["Email", user.email],
-      ["Nama", user.nama],
-      ["No HP", user.phone || "-"],
-      ["Tanggal Lahir", user.tanggal || "-"],
-    ].map(([label, value], index, arr) => (
-      <View key={index}>
-        <View style={styles.row}>
-          <Text style={styles.rowLabel}>{label}</Text>
-          <Text style={styles.rowValue}>{value}</Text>
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <User size={21} color="#000" />
+          <Text style={styles.cardTitle}>Data Diri</Text>
         </View>
 
-        {index !== arr.length - 1 && <View style={styles.divider} />}
+        {[
+          ['Peran', user.role],
+          ['NIP', user.nip || '-'],
+          ['Email', user.email],
+          ['Nama', user.nama],
+          ['No HP', user.phone || '-'],
+          ['Tanggal Lahir', user.tanggal || '-'],
+        ].map(([label, value], index, arr) => (
+          <View key={index}>
+            <View style={styles.row}>
+              <Text style={styles.rowLabel}>{label}</Text>
+              <Text style={styles.rowValue}>{value}</Text>
+            </View>
+
+            {index !== arr.length - 1 && <View style={styles.divider} />}
+          </View>
+        ))}
       </View>
-    ))}
-  </View>
       {/* Edit */}
       <TouchableOpacity
         style={styles.editButton}
-        onPress={() => navigation.navigate("EditProfileGuru")}
+        onPress={() => navigation.navigate('EditProfileGuru')}
       >
         <Text style={styles.editButtonText}>Edit Profil</Text>
       </TouchableOpacity>
 
       {/* Logout */}
       <TouchableOpacity onPress={handleLogout}>
-          <Text style={styles.logout}>Keluar</Text>
-        </TouchableOpacity>
+        <Text style={styles.logout}>Keluar</Text>
+      </TouchableOpacity>
 
       <Footerguru activeTab="profile" />
     </SafeAreaView>
@@ -141,14 +131,14 @@ export default function Profileguru({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFF",
+    backgroundColor: '#FFFF',
   },
 
   header: {
-    backgroundColor: "#1D1A9B",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    backgroundColor: '#1D1A9B',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 18,
     paddingTop: 10,
     paddingBottom: 10,
@@ -156,26 +146,26 @@ const styles = StyleSheet.create({
 
   headerIcon: {
     width: 36,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop:40
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 40,
   },
 
   headerTitle: {
-    color: "#FFF",
+    color: '#FFF',
     fontSize: 22,
-    fontWeight: "700",
-    marginBottom:-30
+    fontWeight: '700',
+    marginBottom: -30,
   },
 
   topSection: {
-    backgroundColor: "#1D1A9B",
+    backgroundColor: '#1D1A9B',
     height: 92,
   },
 
   profileSection: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     paddingHorizontal: 14,
     marginTop: -42,
   },
@@ -185,104 +175,104 @@ const styles = StyleSheet.create({
     height: 70,
     borderRadius: 38,
     borderWidth: 4,
-    borderColor: "#FFF",
-    backgroundColor: "#FFF",
+    borderColor: '#FFF',
+    backgroundColor: '#FFF',
     elevation: 5,
-    marginLeft:20,
+    marginLeft: 20,
   },
 
   profileInfo: {
     flex: 1,
-    marginLeft:-70,
+    marginLeft: -70,
     marginTop: 90,
   },
 
   name: {
     fontSize: 12,
-    fontWeight: "500",
-    color: "#111",
+    fontWeight: '500',
+    color: '#111',
   },
 
   email: {
     marginTop: 4,
     fontSize: 10,
-    color: "#666",
+    color: '#666',
   },
 
-    badge: {
+  badge: {
     marginTop: 90,
-    backgroundColor: "#2417B8", // 🔥 warna utama
+    backgroundColor: '#2417B8', // 🔥 warna utama
     paddingHorizontal: 30,
     paddingVertical: 8,
     borderRadius: 12,
   },
 
   badgeText: {
-    color: "#FFF",
+    color: '#FFF',
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: '700',
   },
 
   card: {
-    backgroundColor: "#FFF",
+    backgroundColor: '#FFF',
     marginHorizontal: 14,
     marginTop: 70,
     borderRadius: 22,
     padding: 22,
     elevation: 6,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOpacity: 0.08,
     shadowRadius: 10,
     shadowOffset: {
       width: 0,
       height: 4,
     },
-    paddingHorizontal:20
+    paddingHorizontal: 20,
   },
 
   cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 16,
   },
 
   cardTitle: {
     fontSize: 15,
-    fontWeight: "500",
+    fontWeight: '500',
     marginLeft: 10,
-    color: "#111",
+    color: '#111',
   },
 
   row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingVertical: 5,
-    paddingHorizontal:5
-    },
+    paddingHorizontal: 5,
+  },
 
   rowLabel: {
     fontSize: 13,
-    color: "#222",
+    color: '#222',
   },
 
   rowValue: {
     fontSize: 13,
-    color: "#A8A8A8",
-    fontWeight: "400",
+    color: '#A8A8A8',
+    fontWeight: '400',
   },
 
   divider: {
     height: 1,
-    backgroundColor: "#ECECEC",
+    backgroundColor: '#ECECEC',
   },
 
   editButton: {
-    alignSelf: "flex-end",
+    alignSelf: 'flex-end',
     marginTop: 18,
     marginRight: 18,
-    backgroundColor: "#FFF",
+    backgroundColor: '#FFF',
     borderWidth: 1,
-    borderColor: "#DADADA",
+    borderColor: '#DADADA',
     borderRadius: 28,
     paddingHorizontal: 20,
     paddingVertical: 10,
@@ -291,25 +281,25 @@ const styles = StyleSheet.create({
 
   editButtonText: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#111",
+    fontWeight: '600',
+    color: '#111',
   },
 
   logoutButton: {
-    marginTop: "auto",
+    marginTop: 'auto',
     marginBottom: 92,
-    alignItems: "center",
+    alignItems: 'center',
   },
 
   logoutText: {
-    color: "#FF0000",
+    color: '#FF0000',
     fontSize: 18,
-    fontWeight: "500",
+    fontWeight: '500',
   },
 
   logout: {
-    textAlign: "center",
-    color: "red",
+    textAlign: 'center',
+    color: 'red',
     marginTop: 70,
   },
 });

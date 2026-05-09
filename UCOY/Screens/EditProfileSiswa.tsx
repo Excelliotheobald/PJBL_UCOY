@@ -18,7 +18,7 @@ import { ChevronLeft, Bell, User, Mail } from "lucide-react-native";
 import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function EditProfileSiswa({ navigation }) {
+export default function EditProfileSiswa({ navigation }: any) {
   const [user, setUser] = useState(null);
 
   const [nama, setNama] = useState("");
@@ -55,15 +55,15 @@ export default function EditProfileSiswa({ navigation }) {
 
   // SAVE
   const handleSave = async () => {
-    const updatedUser = {
-      ...user,
-      nama,
-      email,
-      nis,
-      gender,
-      kelas,
-      jurusan,
-    };
+   const updatedUser = {
+    ...(user || {}),
+    nama,
+    email,
+    nis,
+    gender,
+    kelas,  
+    jurusan,
+};
 
     await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
     Alert.alert("Berhasil", "Profile berhasil diupdate!");

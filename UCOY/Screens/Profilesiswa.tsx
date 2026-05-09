@@ -7,12 +7,15 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
+  ScrollView,
 } from "react-native";
+
 import {
   ChevronLeft,
   Bell,
   User,
 } from "lucide-react-native";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Footersiswa from "../Components/Footersiswa";
 
@@ -20,17 +23,20 @@ export default function Profilesiswa({ navigation }: any) {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-  const loadUser = async () => {
-    const data = await AsyncStorage.getItem("user");
-    if (data) {
-      const parsed = JSON.parse(data);
-      setUser(parsed);
-    }
-  };
+    const loadUser = async () => {
+      const data = await AsyncStorage.getItem("user");
 
-  const unsubscribe = navigation.addListener("focus", loadUser);
-  return unsubscribe;
-}, [navigation]);
+      if (data) {
+        const parsed = JSON.parse(data);
+        setUser(parsed);
+      }
+    };
+
+    const unsubscribe =
+      navigation.addListener("focus", loadUser);
+
+    return unsubscribe;
+  }, [navigation]);
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem("user");
@@ -38,107 +44,163 @@ export default function Profilesiswa({ navigation }: any) {
   };
 
   if (!user) {
-    return <Text style={{ textAlign: "center", marginTop: 50 }}>Loading...</Text>;
+    return (
+      <Text
+        style={{
+          textAlign: "center",
+          marginTop: 50,
+        }}
+      >
+        Loading...
+      </Text>
+    );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#2E2BA6" />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#2E2BA6"
+      />
 
-      {/* HEADER */}
+      {/* ================= HEADER ================= */}
+
       <View style={styles.header}>
-        <ChevronLeft color="#fff" size={24} />
-        <Text style={styles.headerTitle}>Profil</Text>
-        <Bell color="#fff" size={22} />
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => navigation.goBack()}
+        >
+          <ChevronLeft
+            color="#fff"
+            size={26}
+          />
+        </TouchableOpacity>
+
+        <Text style={styles.headerTitle}>
+          Profil
+        </Text>
+
+        <TouchableOpacity style={styles.iconButton}>
+          <Bell
+            color="#fff"
+            size={23}
+          />
+        </TouchableOpacity>
       </View>
 
-      {/* TOP */}
-      <View style={styles.topSection} />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 160,
+        }}
+      >
+        {/* ================= TOP BLUE ================= */}
 
-      {/* PROFILE */}
-      <View style={styles.profileRow}>
-        <Image
-          source={{ uri: `https://i.pravatar.cc/150?u=${user.email}` }}
-          style={styles.avatar}
-        />
+        <View style={styles.topSection}>
+          <View style={styles.topBlue} />
 
-        <View style={{ marginLeft: 10 }}>
-          <Text style={styles.name}>{user.nama}</Text>
-          <Text style={styles.email}>{user.email}</Text>
-        </View>
+          {/* ================= PROFILE ================= */}
 
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>Data Kosong</Text>
-        </View>
-      </View>
+          <View style={styles.profileWrapper}>
+            <Image
+              source={{
+                uri: `https://i.pravatar.cc/150?u=${user.email}`,
+              }}
+              style={styles.avatar}
+            />
 
-      {/* DATA DIRI */}
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <User size={18} />
-          <Text style={styles.cardTitle}>Data Diri</Text>
-        </View>
+            <View style={styles.profileContent}>
+              <View style={styles.profileLeft}>
+                <Text style={styles.name}>
+                  {user.nama}
+                </Text>
 
-        {[
-          ["Peran", user.role],
-          ["NIS", user.nisn || "11410"],
-          ["Email", user.email],
-          ["Nama", user.nama],
-        ].map(([label, value], i) => (
-          <View key={i}>
-            <View style={styles.row}>
-              <Text>{label}</Text>
-              <Text style={{ color: "#999" }}>{value}</Text>
+                <Text style={styles.email}>
+                  {user.email}
+                </Text>
+              </View>
+
+              <View style={styles.badgeContainer}>
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    Data Kosong
+                  </Text>
+                </View>
+
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    Data Kosong
+                  </Text>
+                </View>
+              </View>
             </View>
-            {i !== 3 && <View style={styles.divider} />}
           </View>
-        ))}
-      </View>
+        </View>
 
-      {/* CHART NILAI */}
-      <View style={styles.card}>
-        <Text style={styles.chartTitle}>Rata–Rata Nilai</Text>
+        {/* ================= DATA DIRI ================= */}
 
-        <View style={styles.chart}>
-          {[70, 55, 60, 10].map((val, i) => (
-            <View key={i} style={styles.barContainer}>
-              <View
-                style={[
-                  styles.bar,
-                  {
-                    height: val,
-                    backgroundColor: i === 1 ? "#B6E21D" : "#2E2BA6",
-                  },
-                ]}
-              />
-              <Text style={styles.chartLabel}>Smt {i + 1}</Text>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <User
+              size={18}
+              color="#111"
+            />
+
+            <Text style={styles.cardTitle}>
+              Data Diri
+            </Text>
+          </View>
+
+          {[
+            ["Peran", user.role || "Siswa"],
+            ["NIS", user.nisn || "-"],
+            ["Email", user.email],
+            ["Nama", user.nama],
+          ].map(([label, value], i) => (
+            <View key={i}>
+              <View style={styles.row}>
+                <Text style={styles.label}>
+                  {label}
+                </Text>
+
+                <Text style={styles.value}>
+                  {value}
+                </Text>
+              </View>
+
+              {i !== 3 && (
+                <View style={styles.divider} />
+              )}
             </View>
           ))}
         </View>
 
-        <View style={styles.note}>
-          <Text style={{ fontSize: 10 }}>
-            Catatan: Data ini adalah rata-rata nilai sementara dari hasil ujian...
+        {/* ================= EDIT BUTTON ================= */}
+
+        <TouchableOpacity
+          style={styles.editBtn}
+          onPress={() =>
+            navigation.navigate(
+              "EditProfileSiswa"
+            )
+          }
+        >
+          <Text style={styles.editText}>
+            Edit Profil
           </Text>
-        </View>
-      </View>
+        </TouchableOpacity>
 
-      {/* BUTTON */}
-      <TouchableOpacity
-        style={styles.editBtn}
-        onPress={() => navigation.navigate("EditProfileSiswa")}>
-        <Text>Edit Profil</Text>
-      </TouchableOpacity>
+        {/* ================= LOGOUT ================= */}
 
-      <TouchableOpacity style={styles.detailBtn}>
-        <Text>Detail Nilai</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={handleLogout}>
-        <Text style={styles.logout}>Keluar</Text>
-      </TouchableOpacity>
-
-      
+        <TouchableOpacity
+          onPress={handleLogout}
+          style={styles.logoutWrapper}
+        >
+          <Text style={styles.logout}>
+            Keluar
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
 
       <Footersiswa activeTab="profile" />
     </SafeAreaView>
@@ -146,127 +208,205 @@ export default function Profilesiswa({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F2F2F2" },
+  container: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+  },
+
+  /* ================= HEADER ================= */
 
   header: {
     backgroundColor: "#2E2BA6",
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-    padding: 15,
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 20,
+    zIndex: 10,
+  },
+
+  iconButton: {
+    width: 36,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   headerTitle: {
     color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 21,
+    fontWeight: "700",
+    letterSpacing: 0.3,
   },
 
+  /* ================= TOP SECTION ================= */
+
   topSection: {
-    height: 70,
+    position: "relative",
+    marginBottom: 130,
+  },
+
+  topBlue: {
+    height: 145,
     backgroundColor: "#2E2BA6",
   },
 
-  profileRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: -40,
-    padding: 15,
+  /* ================= PROFILE ================= */
+
+  profileWrapper: {
+    position: "absolute",
+    top: 78,
+    left: 18,
+    right: 18,
+    zIndex: 20,
   },
 
   avatar: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 82,
+    height: 82,
+    borderRadius: 41,
     borderWidth: 3,
     borderColor: "#fff",
+    backgroundColor: "#DDD",
   },
 
-  name: { fontWeight: "bold" },
-  email: { fontSize: 12, color: "#777" },
+  profileContent: {
+    marginTop: 18,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+
+  profileLeft: {
+    flex: 1,
+    paddingRight: 14,
+  },
+
+  name: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#111",
+    marginBottom: 8,
+  },
+
+  email: {
+    fontSize: 13,
+    color: "#666",
+    lineHeight: 20,
+  },
+
+  badgeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+  },
 
   badge: {
-    marginLeft: "auto",
-    backgroundColor: "#ccc",
-    padding: 8,
-    borderRadius: 10,
+    backgroundColor: "#D9D9D9",
+    height: 36,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 8,
   },
 
-  badgeText: { color: "#fff" },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#fff",
+  },
+
+  /* ================= CARD ================= */
 
   card: {
     backgroundColor: "#fff",
-    margin: 15,
-    padding: 15,
-    borderRadius: 15,
+    marginHorizontal: 18,
+    borderRadius: 22,
+    padding: 18,
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 4,
   },
 
   cardHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 14,
   },
 
-  cardTitle: { marginLeft: 10, fontWeight: "bold" },
+  cardTitle: {
+    marginLeft: 10,
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111",
+  },
 
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 5,
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+
+  label: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#222",
+  },
+
+  value: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#A0A0A0",
+    maxWidth: "58%",
+    textAlign: "right",
   },
 
   divider: {
     height: 1,
-    backgroundColor: "#eee",
+    backgroundColor: "#ECECEC",
   },
 
-  chartTitle: {
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-
-  chart: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "flex-end",
-    height: 120,
-  },
-
-  barContainer: {
-    alignItems: "center",
-  },
-
-  bar: {
-    width: 30,
-    borderRadius: 5,
-  },
-
-  chartLabel: {
-    marginTop: 5,
-    fontSize: 10,
-  },
-
-  note: {
-    marginTop: 10,
-    backgroundColor: "#FFE9C9",
-    padding: 8,
-    borderRadius: 8,
-  },
+  /* ================= EDIT BUTTON ================= */
 
   editBtn: {
     alignSelf: "flex-end",
-    marginRight: 20,
-    marginTop: 10,
+    marginTop: 18,
+    marginRight: 22,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#DCDCDC",
+    height: 40,
+    paddingHorizontal: 20,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
-  detailBtn: {
-    alignSelf: "flex-end",
-    marginRight: 20,
-    marginTop: 5,
+  editText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#222",
+  },
+
+  /* ================= LOGOUT ================= */
+
+  logoutWrapper: {
+    marginTop: 90,
+    alignItems: "center",
   },
 
   logout: {
-    textAlign: "center",
     color: "red",
-    marginTop: 20,
+    fontSize: 18,
+    fontWeight: "500",
   },
 });

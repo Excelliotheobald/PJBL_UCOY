@@ -1,23 +1,37 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Platform } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  Platform,
+} from "react-native";
+
 import Svg, { Path } from "react-native-svg";
-import { House, UserRound, Plus } from "lucide-react-native";
+
+import {
+  House,
+  UserRound,
+  BookOpen,
+} from "lucide-react-native";
+
 import { useNavigation } from "@react-navigation/native";
+
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../App";
 
-
 const { width } = Dimensions.get("window");
 
-const CENTER_BUTTON_SIZE = 70;
-const TAB_BAR_HEIGHT = 90;
-const GAP = 15;
+const CENTER_BUTTON_SIZE = 68;
+const TAB_BAR_HEIGHT = 88;
+const GAP = 14;
 
 const COLORS = {
-  primary: "#1D1A9B",
-  background: "#ffffff",
-  textActive: "#1D1A9B",
-  textInactive: "#9DB2CE",
+  primary: "#2B22B6",
+  background: "#FFFFFF",
+  textActive: "#2B22B6",
+  textInactive: "#A8B0C5",
 };
 
 const R = CENTER_BUTTON_SIZE / 1.5;
@@ -42,59 +56,99 @@ interface Props {
   activeTab: "home" | "profile";
 }
 
-export default function Footersiswa({ activeTab }: Props) {
+export default function Footersiswa({
+  activeTab,
+}: Props) {
   const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+    useNavigation<
+      NativeStackNavigationProp<RootStackParamList>
+    >();
 
   return (
     <View style={styles.footerWrapper}>
-      {/* SVG Background */}
+      {/* SVG BACKGROUND */}
+
       <Svg
         width={width}
         height={TAB_BAR_HEIGHT}
         viewBox={`0 0 ${width} ${TAB_BAR_HEIGHT}`}
         style={styles.svg}
       >
-        <Path d={getPath()} fill={COLORS.background} />
+        <Path
+          d={getPath()}
+          fill={COLORS.background}
+        />
       </Svg>
 
-      {/* Tab Items */}
+      {/* TAB */}
+
       <View style={styles.tabContainer}>
         {/* HOME */}
+
         <TouchableOpacity
           style={styles.tabLeft}
-          onPress={() => navigation.navigate("Siswa")}
+          activeOpacity={0.8}
+          onPress={() =>
+            navigation.navigate("Siswa")
+          }
         >
           <House
-            size={30}
-            color={activeTab === "home" ? COLORS.textActive : COLORS.textInactive}
+            size={25}
+            strokeWidth={2.3}
+            color={
+              activeTab === "home"
+                ? COLORS.textActive
+                : COLORS.textInactive
+            }
           />
+
           <Text
             style={[
               styles.text,
-              { color: activeTab === "home" ? COLORS.textActive : COLORS.textInactive },
+              {
+                color:
+                  activeTab === "home"
+                    ? COLORS.textActive
+                    : COLORS.textInactive,
+              },
             ]}
           >
             Beranda
           </Text>
         </TouchableOpacity>
 
-        {/* Spacer for FAB */}
+        {/* SPACER */}
+
         <View style={styles.centerSpacer} />
 
         {/* PROFILE */}
+
         <TouchableOpacity
           style={styles.tabRight}
-          onPress={() => navigation.navigate("Profilesiswa")}
+          activeOpacity={0.8}
+          onPress={() =>
+            navigation.navigate("Profilesiswa")
+          }
         >
           <UserRound
-            size={30}
-            color={activeTab === "profile" ? COLORS.textActive : COLORS.textInactive}
+            size={25}
+            strokeWidth={2.3}
+            color={
+              activeTab === "profile"
+                ? COLORS.textActive
+                : COLORS.textInactive
+            }
           />
+
           <Text
             style={[
               styles.text,
-              { color: activeTab === "profile" ? COLORS.textActive : COLORS.textInactive },
+              {
+                color:
+                  activeTab === "profile"
+                    ? COLORS.textActive
+                    : COLORS.textInactive,
+              },
             ]}
           >
             Profil
@@ -103,11 +157,16 @@ export default function Footersiswa({ activeTab }: Props) {
       </View>
 
       {/* FLOAT BUTTON */}
+
       <TouchableOpacity
+        activeOpacity={0.9}
         style={styles.fabButton}
-        onPress={() => console.log("Tambah Data")}
       >
-        <Plus size={32} color="#fff" />
+        <BookOpen
+          size={30}
+          strokeWidth={2.4}
+          color="#FFFFFF"
+        />
       </TouchableOpacity>
     </View>
   );
@@ -130,8 +189,7 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: "row",
     height: TAB_BAR_HEIGHT,
-    
-    paddingTop: 5,
+    paddingTop: 6,
     justifyContent: "space-between",
     zIndex: 2,
   },
@@ -140,47 +198,65 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingLeft: 20,
+    paddingLeft: 22,
   },
 
   tabRight: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingRight: 20,
+    paddingRight: 22,
   },
 
   centerSpacer: {
-    width: CENTER_BUTTON_SIZE + GAP * 2 + 30,
+    width:
+      CENTER_BUTTON_SIZE +
+      GAP * 2 +
+      28,
   },
 
   text: {
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 11,
+    marginTop: 4,
     fontWeight: "600",
+    letterSpacing: 0.1,
   },
 
   fabButton: {
     position: "absolute",
-    top: -CURVE_DEPTH + 10,
-    left: width / 2 - CENTER_BUTTON_SIZE / 2,
+    top: -CURVE_DEPTH + 11,
+    left:
+      width / 2 -
+      CENTER_BUTTON_SIZE / 2,
+
     width: CENTER_BUTTON_SIZE,
     height: CENTER_BUTTON_SIZE,
-    borderRadius: CENTER_BUTTON_SIZE / 2,
+    borderRadius:
+      CENTER_BUTTON_SIZE / 2,
+
     backgroundColor: COLORS.primary,
+
     alignItems: "center",
     justifyContent: "center",
-    borderColor: "#fff",
-    borderWidth: 3,
+
+    borderColor: "#FFFFFF",
+    borderWidth: 4,
+
     zIndex: 3,
 
     ...Platform.select({
-      android: { elevation: 10 },
+      android: {
+        elevation: 12,
+      },
+
       ios: {
         shadowColor: "#000",
-        shadowOpacity: 0.25,
-        shadowOffset: { width: 0, height: 4 },
-        shadowRadius: 5,
+        shadowOpacity: 0.18,
+        shadowOffset: {
+          width: 0,
+          height: 4,
+        },
+        shadowRadius: 6,
       },
     }),
   },
