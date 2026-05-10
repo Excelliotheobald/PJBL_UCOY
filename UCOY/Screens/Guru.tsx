@@ -22,7 +22,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 
 interface KelasType {
-  id: string;
+  _id: string;
   namaKelas: string;
   mapel: string;
   siswa: any[];
@@ -36,40 +36,50 @@ export default function Guru({ navigation }: any) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [kelas, setKelas] = useState<KelasType[]>([]);
+  const loadKelas = async () => {
+  try {
+    const savedUser = await AsyncStorage.getItem("user");
+
+    console.log("USER:", savedUser);
+
+    const parsedUser = JSON.parse(savedUser || "{}");
+
+    console.log("USER ID:", parsedUser._id);
+
+    const response = await fetch(
+      `http://localhost:5000/api/class/classes/${parsedUser._id}`
+    );
+
+    console.log("STATUS:", response.status);
+
+    const data = await response.json();
+
+    console.log("DATA:", data);
+
+    setKelas(data);
+  } catch (err) {
+    console.log("Gagal load kelas:", err);
+  }
+};
 
   useEffect(() => {
-    const loadData = async () => {
-      const savedUser = await AsyncStorage.getItem("user");
+  const loadData = async () => {
+    const savedUser = await AsyncStorage.getItem("user");
 
-      if (savedUser) {
-        const parsed = JSON.parse(savedUser);
-        setNama(parsed.nama);
-         setUser(parsed); //
-      }
+    if (savedUser) {
+      const parsed = JSON.parse(savedUser);
 
-      // 🟩 Ambil data kelas
-      const savedClass = await AsyncStorage.getItem('kelas');
+      setNama(parsed.nama);
+      setUser(parsed);
+    }
 
-      if (savedClass) {
-        const parsed = JSON.parse(savedClass);
+    await loadKelas();
+  };
 
-        // 🔥 filter data biar cuma yang valid
-        const cleanData = parsed
-          .filter((item: any) => item.mapel && item.namaKelas)
-          .map((item: any) => ({
-            ...item,
-            siswa: Array.isArray(item.siswa) ? item.siswa : [],
-          }));
+  const unsubscribe = navigation.addListener("focus", loadData);
 
-        setKelas(cleanData);
-      } else {
-        setKelas([]);
-      }
-    };
-
-    const unsubscribe = navigation.addListener('focus', loadData);
-    return unsubscribe;
-  }, [navigation]);
+  return unsubscribe;
+}, [navigation]);
 
   const formbuatkelas = () => {
     navigation.navigate('formbuatkelas' as never);
@@ -80,29 +90,29 @@ export default function Guru({ navigation }: any) {
     navigation.replace("ChooseRole" as never);
   };
 
-  const handleDeleteClass = async (id: string) => {
-    Alert.alert('Hapus Kelas', 'Yakin ingin menghapus kelas ini?', [
-      { text: 'Batal', style: 'cancel' },
-      {
-        text: 'Hapus',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            const stored = await AsyncStorage.getItem('kelas');
-            let list: KelasType[] = stored ? JSON.parse(stored) : [];
+ const handleDeleteClass = async (id: string) => {
+  Alert.alert('Hapus Kelas', 'Yakin ingin menghapus kelas ini?', [
+    { text: 'Batal', style: 'cancel' },
+    {
+      text: 'Hapus',
+      style: 'destructive',
+      onPress: async () => {
+        try {
+          await fetch(
+            `http://localhost:5000/api/class/delete-class/${id}`,
+            {
+              method: "DELETE",
+            }
+          );
 
-            const updated = list.filter(item => item.id !== id);
-
-            await AsyncStorage.setItem('kelas', JSON.stringify(updated));
-            setKelas(updated);
-          } catch (error) {
-            console.log('Gagal hapus kelas:', error);
-          }
-        },
+          loadKelas();
+        } catch (error) {
+          console.log('Gagal hapus kelas:', error);
+        }
       },
-    ]);
-  };
-
+    },
+  ]);
+};
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#EEEEF3' }}>
       <ScrollView

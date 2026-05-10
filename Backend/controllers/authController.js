@@ -72,6 +72,56 @@ export const login = async (req, res) => {
 };
 
 /* ======================
+          Save Profile
+====================== */
+export const updateProfile = async (req, res) => {
+  try {
+    const {
+      email,
+      nama,
+      gender,
+      avatar,
+      mapel,
+      nip,
+      tanggal,
+      phone,
+    } = req.body;
+
+    const updatedUser = await User.findOneAndUpdate(
+      { email },
+      {
+        nama,
+        gender,
+        avatar,
+        mapel,
+        nip,
+        tanggal,
+        phone,
+      },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        message: "User tidak ditemukan",
+      });
+    }
+
+    res.json({
+      message: "Profile berhasil diupdate",
+      user: updatedUser,
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
+
+/* ======================
       FORGOT PASSWORD (OTP)
 ====================== */
 export const forgotPassword = async (req, res) => {

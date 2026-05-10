@@ -14,8 +14,6 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
-
 const { width, height } = Dimensions.get('window');
 
 export default function ChooseRole() {
@@ -346,11 +344,18 @@ function LoginView({ onClose, onSwitch, onForgot, navigation }: any) {
     }
 
     // 🔥 SIMPAN USER LENGKAP (INI KUNCI)
-      const userData = {
-    ...data.user,
-    nama: data.user?.nama || "User",
-    email: data.user?.email || email,
-  };
+    const oldUser = await AsyncStorage.getItem("user");
+
+    const parsedOldUser = oldUser
+      ? JSON.parse(oldUser)
+      : {};
+
+    const userData = {
+      ...parsedOldUser, // 🔥 ambil data lama
+      ...data.user,     // 🔥 update data backend
+      nama: data.user?.nama || parsedOldUser.nama,
+      email: data.user?.email || parsedOldUser.email,
+    };
 
 await AsyncStorage.setItem("user", JSON.stringify(userData));
 
@@ -473,7 +478,7 @@ function ForgotPasswordView({ onClose, onSwitch }: any) {
     if (!password) return Alert.alert("Oops", "Password harus diisi.");
 
     try {
-      const res = await fetch("http://localhost:5000/api/users/reset-password", {
+      const res = await fetch("http://192.168.1.112:5000/api/users/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, token, password }),

@@ -19,38 +19,48 @@ export default function FormBuatKelas({ navigation }: any) {
 
   const isFilled = judul && tingkat;
 
-  const generateKode = () => {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let result = "";
-  for (let i = 0; i < 6; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result.slice(0, 3) + "-" + result.slice(3);
-};
+ const simpanKelas = async () => {
+  if (!isFilled) return;
 
-  const simpanKelas = async () => {
-    if (!isFilled) return;
+  try {
+    const user = await AsyncStorage.getItem("user");
 
-  const dataBaru = {
-  id: Date.now().toString(),
+    const parsedUser = JSON.parse(user || "{}");
+
+    console.log("USER CREATE:", parsedUser);
+
+    console.log({
   mapel: judul,
   namaKelas: tingkat,
-  kode: generateKode(),   // 🔥 INI PENTING
-  siswa: []               // 🔥 buat nanti nampung siswa
+  guruId: parsedUser._id,
+});
+
+    const response = await fetch(
+      "http://localhost:5000/api/class/create-class",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          mapel: judul,
+          namaKelas: tingkat,
+          guruId: parsedUser._id,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    console.log("Kelas berhasil dibuat:", data);
+
+    navigation.goBack();
+  } catch (err) {
+    console.log("Gagal membuat kelas:", err);
+  }
 };
-    try {
-      const dataLama = await AsyncStorage.getItem("kelas");
-      let arr = dataLama ? JSON.parse(dataLama) : [];
-
-      arr.push(dataBaru);
-
-      await AsyncStorage.setItem("kelas", JSON.stringify(arr));
-
-      navigation.goBack();
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   return (
     <SafeAreaView style={styles.container}>

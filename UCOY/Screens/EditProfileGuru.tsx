@@ -12,6 +12,7 @@ import {
   Animated,
   PanResponder,
   Dimensions,
+  Alert,
 } from "react-native";
 import {
   ChevronLeft,
@@ -80,22 +81,49 @@ export default function EditProfileGuru({ navigation }: any) {
 
   // 🔥 SAVE DATA
   const handleSave = async () => {
-    const updatedUser = {
-      ...user,
-      nama,
-      email,
-      gender,
-      avatar,
-      mapel,
-      nip,
-      tanggal,
-      phone: `${countryCode}${phone}`,  
-    };
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/users/update-profile",
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          nama,
+          gender,
+          avatar,
+          mapel,
+          nip,
+          tanggal,
+          phone: `${countryCode}${phone}`,
+        }),
+      }
+    );
 
-    await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+    const data = await response.json();
+
+    if (!response.ok) {
+      Alert.alert("Error", data.message);
+      return;
+    }
+
+    // 🔥 update AsyncStorage juga
+    await AsyncStorage.setItem(
+      "user",
+      JSON.stringify(data.user)
+    );
+
+    Alert.alert("Success", "Profile berhasil disimpan");
 
     navigation.goBack();
-  };
+
+  } catch (error) {
+    console.log(error);
+    Alert.alert("Error", "Server error");
+  }
+};
 
   // 🔥 PAN
   const panResponder = PanResponder.create({

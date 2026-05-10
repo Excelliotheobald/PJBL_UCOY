@@ -18,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
+import QRCode from "react-native-qrcode-svg";
 
 
 
@@ -28,6 +29,7 @@ export default function KelolaKelas({ navigation, route }: any) {
   const tingkat = kelas?.namaKelas || "X";
   const kodeKelas = kelas?.kode || "-";
   const judulKelas = `${mapel} Kelas ${tingkat}`;
+  const [showQR, setShowQR] = useState(false);
 
   const [ujianList, setUjianList] = useState<any[]>([]);
 
@@ -179,8 +181,11 @@ return (
               <TouchableOpacity style={styles.salinButton} onPress={salinKode}>
                 <Text style={styles.salinText}>Salin Kode</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.iconButton}>
-                <Image source={require("./kode.png")} style={styles.salinIcon} />
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={() => setShowQR(true)}
+              >
+                <Image source={require("./barcode.png")} style={styles.salinIcon} />
               </TouchableOpacity>
             </View>
           </View>
@@ -314,33 +319,111 @@ return (
 
         </View>
       </ScrollView>
+    {showQR && (
+  <View style={styles.qrOverlay}>
+    <View style={styles.qrCard}>
+
+      <Text style={styles.qrTitle}>
+  Scan QR Kelas
+</Text>
+
+<QRCode
+  value={String(kodeKelas || "KODE-KELAS")}
+  size={220}
+/>
+
+<Text style={styles.qrCodeText}>
+  {kodeKelas}
+</Text>
+      <TouchableOpacity
+        style={styles.closeBtn}
+        onPress={() => setShowQR(false)}
+      >
+        <Text style={{ color: "#fff", fontWeight: "600" }}>
+          Tutup
+        </Text>
+      </TouchableOpacity>
+
+    </View>
+  </View>
+)}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  tabContainer: {
-    flexDirection: "row",
-    marginHorizontal: 16,
-    marginTop: 12,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    height: 44,
-    position: "relative",
-    overflow: "hidden",
-    zIndex: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 6,
-    elevation: 8,
-  },
   tabButton: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     zIndex: 2,
   },
+
+  qrTitle: {
+  fontSize: 20,
+  fontWeight: "700",
+  marginBottom: 20,
+  color: "#1D1A9B",
+},
+
+qrCodeText: {
+  marginTop: 16,
+  fontSize: 18,
+  fontWeight: "600",
+  color: "#000",
+},
+
+qrOverlay: {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+
+  backgroundColor: "rgba(0,0,0,0.55)",
+
+  justifyContent: "center",
+  alignItems: "center",
+
+  zIndex: 9999,
+  elevation: 999,
+},
+
+qrCard: {
+  backgroundColor: "#fff",
+  width: "82%",
+  borderRadius: 24,
+
+  paddingVertical: 30,
+  paddingHorizontal: 20,
+
+  alignItems: "center",
+
+  elevation: 20,
+},
+
+tabContainer: {
+  flexDirection: "row",
+  marginHorizontal: 16,
+  marginTop: 12,
+  backgroundColor: "#fff",
+  borderRadius: 12,
+  height: 44,
+  position: "relative",
+  overflow: "hidden",
+
+  zIndex: 1,
+  elevation: 2,
+},
+
+closeBtn: {
+  marginTop: 20,
+  backgroundColor: "#1D1A9B",
+  paddingHorizontal: 30,
+  paddingVertical: 10,
+  borderRadius: 10,
+},
+
   slider: {
     position: "absolute",
     width: "50%",

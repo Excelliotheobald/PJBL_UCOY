@@ -8,7 +8,7 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import userRoutes from "./routes/authRoutes.js";
-
+import classRoutes from "./routes/classRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -28,6 +28,7 @@ app.use(limiter); // ✅ rate limit
 
 // 🔥 ROUTES
 app.use("/api/users", userRoutes);
+app.use("/api/class", classRoutes);
 
 // DB
 mongoose
