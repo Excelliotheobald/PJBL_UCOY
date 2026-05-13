@@ -478,7 +478,7 @@ function ForgotPasswordView({ onClose, onSwitch }: any) {
     if (!password) return Alert.alert("Oops", "Password harus diisi.");
 
     try {
-      const res = await fetch("http://192.168.1.112:5000/api/users/reset-password", {
+      const res = await fetch("http://localhost:5000/api/users/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, token, password }),

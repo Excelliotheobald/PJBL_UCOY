@@ -23,12 +23,18 @@ const classSchema = new mongoose.Schema(
       ref: "User",
     },
 
-    siswa: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+ siswa: [
+  {
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    nama: {
+      type: String,
+    },
+  },
+],
   },
   {
     timestamps: true,

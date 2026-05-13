@@ -33,6 +33,7 @@ export const register = async (req, res) => {
     });
 
     const { password: _, ...userData } = user.toObject();
+    
 
     res.json({ message: "Register sukses", user: userData });
   } catch (err) {

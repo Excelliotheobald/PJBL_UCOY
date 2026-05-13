@@ -17,8 +17,7 @@ import BuatSoalDetail from './UCOY/Screens/BuatSoalDetail';
 import EditProfileGuru from './UCOY/Screens/EditProfileGuru';
 import EditProfileSiswa from './UCOY/Screens/EditProfileSiswa';
 import DetailUjian from './UCOY/Screens/DetailUjian';
-import ImmersiveMode from "react-native-immersive-mode";
-
+import ScanQR from './UCOY/Screens/ScanQR';
 
 // ================= TYPES =================
 export type RootStackParamList = {
@@ -26,7 +25,7 @@ export type RootStackParamList = {
   Onboarding: undefined;
   ChooseRole: undefined;
   Guru: undefined;
-  Siswa: undefined;
+  Siswa: { kodeQR?: string } | undefined;
   Profileguru: undefined;
   Profilesiswa: undefined;
   formbuatkelas: undefined;
@@ -53,7 +52,10 @@ export type RootStackParamList = {
     ujian: any;
     kelas: any;
   };
+
+  ScanQR: undefined;
 };
+
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -69,11 +71,7 @@ const linking = {
 
 // ================= APP =================
 export default function App() {
-  useEffect(() => {
-    ImmersiveMode.fullLayout(true);
-    ImmersiveMode.setBarMode("Full");
-  }, []);
-  
+
   return (
     <NavigationContainer linking={linking}>
       <Stack.Navigator
@@ -85,7 +83,6 @@ export default function App() {
         <Stack.Screen name="ChooseRole" component={ChooseRole} />
         <Stack.Screen name="Guru" component={Guru} />
         <Stack.Screen name="Siswa" component={Siswa} />
-
         <Stack.Screen name="Profileguru" component={Profileguru} />
         <Stack.Screen name="Profilesiswa" component={Profilesiswa} />
         <Stack.Screen name="formbuatkelas" component={formbuatkelas} />
@@ -96,6 +93,7 @@ export default function App() {
         <Stack.Screen name="EditProfileGuru" component={EditProfileGuru} />
         <Stack.Screen name="EditProfileSiswa" component={EditProfileSiswa} />
         <Stack.Screen name="DetailUjian" component={DetailUjian} />
+        <Stack.Screen name="ScanQR" component={ScanQR} />
 
       </Stack.Navigator>
     </NavigationContainer>

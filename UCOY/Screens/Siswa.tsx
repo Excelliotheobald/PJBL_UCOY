@@ -19,7 +19,7 @@ import { Bell, ScanLine, BookOpen } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
-export default function Siswa({ navigation }: any) {
+export default function Siswa({ navigation, route }: any) {
   const [kodeKelas, setKodeKelas] = useState('');
   const [kelasSaya, setKelasSaya] = useState<any[]>([]);
   const [activeBanner, setActiveBanner] = useState(0);
@@ -43,66 +43,58 @@ export default function Siswa({ navigation }: any) {
 
     setNama(user.nama || 'Siswa');
 
-    const kelasUser = list.filter((k: any) =>
-      k.siswa?.some((s: any) => s.id === user.id),
-    );
+   const kelasUser = list.filter((k: any) =>
+  k.siswa?.some((s: any) => s.id?.toString() === user._id),
+);
 
     setKelasSaya(kelasUser);
   };
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', loadKelas);
+useEffect(() => {
+  if (route.params?.kodeQR) {
+    handleJoinKelas(route.params.kodeQR);
+  }
+}, [route.params?.kodeQR]);
 
-    return unsubscribe;
-  }, [navigation]);
+const handleJoinKelas = async (kodeParam?: string) => {
+  const kodeFinal = kodeParam || kodeKelas;
 
-  // =========================
-  // JOIN KELAS
-  // =========================
-  const handleJoinKelas = async () => {
-    const data = await AsyncStorage.getItem('kelas');
-    let list = data ? JSON.parse(data) : [];
+  if (!kodeFinal) {
+    Alert.alert("Masukkan kode kelas");
+    return;
+  }
 
-    const kelasDitemukan = list.find((k: any) => k.kode === kodeKelas);
+  try {
+    const userData = await AsyncStorage.getItem("user");
+    const user = JSON.parse(userData || "{}");
 
-    if (!kelasDitemukan) {
-      Alert.alert('Kode kelas tidak ditemukan');
+   const res = await fetch("http://localhost:5000/api/class/join-class", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    kode: kodeFinal.toUpperCase(),
+    userId: user._id, // 🔥 PENTING
+    nama: user.nama,
+  }),
+});
+    const data = await res.json();
+
+    if (!res.ok) {
+      Alert.alert(data.message || "Gagal join");
       return;
     }
 
-    const userData = await AsyncStorage.getItem('user');
-    const user = userData ? JSON.parse(userData) : null;
-
-    if (!user) {
-      Alert.alert('User tidak ditemukan');
-      return;
-    }
-
-    if (!kelasDitemukan.siswa) {
-      kelasDitemukan.siswa = [];
-    }
-
-    const sudahMasuk = kelasDitemukan.siswa.find((s: any) => s.id === user.id);
-
-    if (!sudahMasuk) {
-      kelasDitemukan.siswa.push({
-        id: user.id,
-        nama: user.nama,
-      });
-    }
-
-    const updated = list.map((k: any) =>
-      k.id === kelasDitemukan.id ? kelasDitemukan : k,
-    );
-
-    await AsyncStorage.setItem('kelas', JSON.stringify(updated));
-
-    loadKelas();
-
-    navigation.navigate('KelasSiswa', {
-      kelas: kelasDitemukan,
+    navigation.navigate("KelasSiswa", {
+      kelas: data.kelas,
     });
-  };
+
+  } catch (err) {
+    console.log(err);
+    Alert.alert("Server error");
+  }
+};
 
   // =========================
   // BANNER DATA
@@ -207,22 +199,23 @@ export default function Siswa({ navigation }: any) {
               style={styles.input}
             />
 
-            <TouchableOpacity style={styles.scanButton}>
-              <ScanLine size={19} color="#5145CD" />
+            <TouchableOpacity 
+                style={styles.scanButton}
+                onPress={() => navigation.navigate("ScanQR")}
+              >
+                <ScanLine size={19} color="#5145CD" />
             </TouchableOpacity>
           </View>
 
           {/* BUTTON */}
-
           <TouchableOpacity
             style={styles.joinButton}
             activeOpacity={0.85}
-            onPress={handleJoinKelas}
+            onPress={() => handleJoinKelas()}
           >
             <Text style={styles.joinButtonText}>Gabung Kelas</Text>
           </TouchableOpacity>
         </View>
-
         {/* ================= INFO ================= */}
 
         <View style={styles.infoContainer}>
