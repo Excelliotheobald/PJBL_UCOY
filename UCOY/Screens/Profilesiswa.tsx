@@ -93,12 +93,14 @@ export default function Profilesiswa({ navigation }: any) {
 
       {/* Profile */}
       <View style={styles.profileSection}>
-        <Image
-          source={{
-            uri: `https://i.pravatar.cc/150?u=${user.email}`,
-          }}
-          style={styles.avatar}
-        />
+       <Image
+        source={
+          user.avatar
+            ? { uri: user.avatar }
+            : require("./profile.png")
+        }
+        style={styles.avatar}
+      />
 
         <View style={styles.profileInfo}>
           <Text style={styles.name}>
@@ -139,47 +141,25 @@ export default function Profilesiswa({ navigation }: any) {
             Data Diri
           </Text>
         </View>
+      {[
+        ["Peran", user.role],
+        ["NISN", user.nisn || "-"],
+        ["Email", user.email],
+        ["Nama", user.nama],
+        ["No HP", user.phone || "-"],
+        ["Tanggal Lahir", user.tanggal || "-"],
+      ].map(([label, value], index, arr) => (
+        <View key={index}>
+          <View style={styles.row}>
+            <Text style={styles.rowLabel}>{label}</Text>
+            <Text style={styles.rowValue}>{value}</Text>
+          </View>
 
-        {[
-          ["Peran", user.role],
-          ["NISN", user.nisn || "-"],
-          ["Email", user.email],
-          ["Nama", user.nama],
-          ["No HP", user.phone || "-"],
-          [
-            "Tanggal Lahir",
-            user.tanggal || "-",
-          ],
-        ].map(
-          (
-            [label, value],
-            index,
-            arr
-          ) => (
-            <View key={index}>
-              <View style={styles.row}>
-                <Text
-                  style={styles.rowLabel}
-                >
-                  {label}
-                </Text>
-
-                <Text
-                  style={styles.rowValue}
-                >
-                  {value}
-                </Text>
-              </View>
-
-              {index !==
-                arr.length - 1 && (
-                <View
-                  style={styles.divider}
-                />
-              )}
-            </View>
-          )
-        )}
+          {index !== arr.length - 1 && (
+            <View style={styles.divider} />
+          )}
+        </View>
+      ))}
       </View>
 
       {/* Edit */}

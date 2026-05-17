@@ -49,6 +49,11 @@ export default function Siswa({ navigation, route }: any) {
 
     setKelasSaya(kelasUser);
   };
+useEffect(() => {
+  loadKelas();
+}, []);
+
+
 
 useEffect(() => {
   if (route.params?.kodeQR) {
@@ -80,6 +85,21 @@ const handleJoinKelas = async (kodeParam?: string) => {
   }),
 });
     const data = await res.json();
+
+    // ambil data lama
+const existing = await AsyncStorage.getItem("kelas");
+let list = existing ? JSON.parse(existing) : [];
+
+// push kelas baru (hindari duplicate)
+const sudahAda = list.find((k: any) => k._id === data.kelas._id);
+
+if (!sudahAda) {
+  list.push(data.kelas);
+  await AsyncStorage.setItem("kelas", JSON.stringify(list));
+}
+
+// reload UI
+loadKelas();
 
     if (!res.ok) {
       Alert.alert(data.message || "Gagal join");
@@ -265,60 +285,76 @@ const handleJoinKelas = async (kodeParam?: string) => {
         </View>
 
         {/* ================= KELAS ================= */}
+<Text style={styles.kelasHeading}>Kelas</Text>
 
-        {kelasSaya.length > 0 ? (
-          kelasSaya.map((kelas, index) => (
-            <TouchableOpacity
-              key={index}
-              activeOpacity={0.9}
-              style={styles.classCard}
-              onPress={() =>
-                navigation.navigate('KelasSiswa', {
-                  kelas,
-                })
-              }
-            >
-              {/* ICON BUKU */}
+{kelasSaya.length > 0 ? (
+  kelasSaya.map((kelas, index) => (
+    <View key={index} style={styles.classContainer}>
+      <View style={styles.classCardHorizontal}>
+      {/* LEFT */}
+      <View style={styles.classLeft}>
 
-              <View style={styles.classIcon}>
-                <BookOpen size={20} color="#5145CD" strokeWidth={2.2} />
-              </View>
+        {/* ICON */}
+        <View style={styles.iconWrapper}>
+          <Image
+            source={require('./1234.png')}
+            style={styles.classImage}
+            resizeMode="contain"
+          />
+        </View>
 
-              <Text style={styles.classTitle}>{kelas.mapel}</Text>
+        {/* INFO */}
+        <View style={styles.classInfo}>
+          <Text style={styles.classTitle}>
+            {kelas.mapel}
+          </Text>
 
-              <Text style={styles.classSubtitle}>Kelas {kelas.namaKelas}</Text>
+          <Text style={styles.classSubtitle}>
+            Kelas {kelas.namaKelas}
+          </Text>
+        </View>
+      </View>
 
-              <TouchableOpacity
-                style={styles.enterButton}
-                onPress={() =>
-                  navigation.navigate('KelasSiswa', {
-                    kelas,
-                  })
-                }
-              >
-                <Text style={styles.enterText}>Masuk Kelas</Text>
-              </TouchableOpacity>
-            </TouchableOpacity>
-          ))
-        ) : (
-          <View style={styles.emptyCard}>
-            {/* ICON BUKU */}
+      {/* BUTTON */}
+      <TouchableOpacity
+        style={styles.enterButton}
+        onPress={() =>
+          navigation.navigate('KelasSiswa', {
+            kelas,
+          })
+        }
+      >
+        <Text style={styles.enterText}>
+          Masuk Kelas
+        </Text>
+      </TouchableOpacity>
+    </View>
+    </View>
+  ))
+) : (
+  <View style={styles.emptyCard}>
 
-            <View style={styles.emptyIcon}>
-              <BookOpen size={22} color="#5145CD" strokeWidth={2.2} />
-            </View>
+    <View style={styles.emptyIcon}>
+      <BookOpen
+        size={22}
+        color="#5145CD"
+        strokeWidth={2.2}
+      />
+    </View>
 
-            <Text style={styles.emptyTitle}>Belum Ada Kelas</Text>
+    <Text style={styles.emptyTitle}>
+      Belum Ada Kelas
+    </Text>
 
-            <Text style={styles.emptyDesc}>
-              Gabung kelas pertama dengan memasukan kode{'\n'}
-              atau memindai kode untuk mengikuti ujian.
-            </Text>
-          </View>
-        )}
+    <Text style={styles.emptyDesc}>
+      Gabung kelas pertama dengan memasukan kode{'\n'}
+      atau memindai kode untuk mengikuti ujian.
+    </Text>
+  </View>
+)}
 
         {/* ================= LANGKAH MEMULAI ================= */}
-
+        {kelasSaya.length === 0 && (
         <View style={styles.startContainer}>
           <Text style={styles.startTitle}>
             Langkah Memulai <Text style={{ color: '#FF3B30' }}>!</Text>
@@ -378,6 +414,7 @@ const handleJoinKelas = async (kodeParam?: string) => {
             </View>
           </View>
         </View>
+        )}
       </ScrollView>
 
       <Footersiswa activeTab="home" />
@@ -794,6 +831,22 @@ const styles = StyleSheet.create({
   },
 
   // ================= CLASS CARD =================
+kelasHeading: {
+  fontSize: 18,
+  fontWeight: '700',
+  color: '#111',
+  marginTop: 22,
+  marginBottom: 12,
+  paddingHorizontal: 16,
+},
+
+classContainer: {
+  backgroundColor: '#FFFFFF',
+  marginHorizontal: 16,
+  borderRadius: 18,
+  padding: 10,
+  marginBottom: 12,
+},
 
   classCard: {
     backgroundColor: '#fff',
@@ -815,6 +868,43 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
 
+classCardHorizontal: {
+  backgroundColor: '#2B22B6',
+  borderRadius: 20,
+  paddingVertical: 14,
+  paddingHorizontal: 14,
+
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+},
+
+classLeft: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  flex: 1,
+},
+
+iconWrapper: {
+  width: 54,
+  height: 54,
+  borderRadius: 16,
+  backgroundColor: 'transparent', // karena icon kamu udah putih
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginRight: 12,
+},
+
+classImage: {
+  width: 40,
+  height: 40,
+},
+
+
+classInfo: {
+  flex: 1,
+},
+
   classIcon: {
     width: 54,
     height: 54,
@@ -826,33 +916,31 @@ const styles = StyleSheet.create({
   },
 
   classTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#111',
-  },
+  fontSize: 16,
+  fontWeight: '700',
+  color: '#fff',
+},
 
-  classSubtitle: {
-    color: '#666',
-    marginTop: 5,
-    marginBottom: 18,
-    fontSize: 12,
-    fontWeight: '500',
-  },
+ classSubtitle: {
+  fontSize: 11,
+  color: '#D7D5FF',
+  marginTop: 2,
+},
 
-  enterButton: {
-    backgroundColor: '#2B22B6',
-    paddingHorizontal: 22,
-    height: 44,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+enterButton: {
+  backgroundColor: '#C8F031',
+  paddingHorizontal: 16,
+  height: 34,
+  borderRadius: 10,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
 
-  enterText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 12,
-  },
+enterText: {
+  color: '#2B22B6',
+  fontWeight: '700',
+  fontSize: 11,
+},
 
   namaSiswa: {
     color: '#FFFFFF',

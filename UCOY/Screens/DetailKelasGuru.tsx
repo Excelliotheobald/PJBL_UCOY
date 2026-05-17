@@ -69,27 +69,55 @@ export default function KelolaKelas({ navigation, route }: any) {
         style: "destructive",
         onPress: async () => {
           try {
+
+            // 🔥 DELETE KE SERVER
+           const response = await fetch( `http://localhost:5000/api/class/delete-class/${kelas._id}`, 
+            { 
+              method: "DELETE", 
+              headers: { 
+                "Content-Type": "application/json", 
+              }, 
+            } 
+          );
+
+            const data = await response.json();
+
+            console.log("DELETE RESPONSE:", data);
+
+            if (!response.ok) { 
+              throw new Error(data.message || "Gagal hapus"); 
+            }
+
+            // 🔥 HAPUS DARI ASYNCSTORAGE
             const stored = await AsyncStorage.getItem("kelas");
-            let list: any[] = stored ? JSON.parse(stored) : [];
+
+            let list = stored ? JSON.parse(stored) : [];
 
             const updated = list.filter(
-              (item) => item.id !== kelas?.id
-            );
-
+            (item: any) => item._id !== kelas._id
+);
             await AsyncStorage.setItem(
               "kelas",
               JSON.stringify(updated)
             );
 
-            navigation.goBack();
+            // 🔥 KEMBALI
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "Guru" }],
+            });
+
           } catch (error) {
             console.log("Gagal menghapus kelas:", error);
-            Alert.alert("Error", "Gagal menghapus kelas.");
+
+            Alert.alert(
+              "Error",
+              "Gagal menghapus kelas"
+            );
           }
         },
       },
-    ],
-    { cancelable: true }
+    ]
   );
 };
 
@@ -99,7 +127,7 @@ export default function KelolaKelas({ navigation, route }: any) {
   const saveUjian = async (data: any[]) => {
     try {
       await AsyncStorage.setItem(
-        `ujian_${kelas.id}`,
+        `ujian_${kelas._id}`,
         JSON.stringify(data)
       );
     } catch (e) {
@@ -116,7 +144,7 @@ export default function KelolaKelas({ navigation, route }: any) {
   useCallback(() => {
     const loadUjian = async () => {
       try {
-        const stored = await AsyncStorage.getItem(`ujian_${kelas.id}`);
+        const stored = await AsyncStorage.getItem(`ujian_${kelas._id}`);
         if (stored) {
           setUjianList(JSON.parse(stored));
         } else {
@@ -128,7 +156,7 @@ export default function KelolaKelas({ navigation, route }: any) {
     };
 
     loadUjian();
-  }, [kelas.id])
+  }, [kelas._id])
 );
 
 return (
@@ -242,17 +270,17 @@ return (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Soal Ujian</Text>
           {ujianList.map((item: any, index) => (
-  <TouchableOpacity
-    key={index}
-    style={styles.card}
-    activeOpacity={0.8}
-    onPress={() => {
-      console.log("CARD DIKLIK"); // 🔥 taruh di sini
-      navigation.navigate("DetailUjian", {
-        ujian: item,
-        kelas,
-      });
-    }}
+          <TouchableOpacity
+            key={index}
+            style={styles.card}
+            activeOpacity={0.8}
+            onPress={() => {
+              console.log("CARD DIKLIK"); // 🔥 taruh di sini
+              navigation.navigate("DetailUjian", {
+                ujian: item,
+                kelas,
+              });
+            }}
   >
 
     {/* HEADER */}
